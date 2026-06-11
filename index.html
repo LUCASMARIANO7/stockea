@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockea — Controlá todo tu negocio desde un solo lugar</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Stockea">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<meta name="description" content="Stockea es la plataforma integral de gestión comercial para comercios y PyMEs. Control de stock, ventas, clientes, caja, reportes y más. Probá gratis 14 días.">
+<meta name="keywords" content="sistema de gestión, control de stock, software para comercios, ERP para PyMEs, CRM para negocios, gestión comercial, inventario, ventas">
+<meta property="og:title" content="Stockea — Gestión integral para tu negocio">
+<meta property="og:description" content="Stock, ventas, clientes, caja y reportes en tiempo real. Todo en un solo lugar.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://stockea.com">
+<meta name="theme-color" content="#3D5AFE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Stockea","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"15000","priceCurrency":"ARS"},"description":"Plataforma integral de gestión comercial para comercios y PyMEs"}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#3D5AFE;--blue2:#2A47F5;--green:#00C48C;--green2:#00A878;
+  --dark:#0A0F1E;--dark2:#0F1628;--dark3:#141B30;--dark4:#1B2340;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.12);
+  --text:#F0F4FF;--text2:#A0ADCB;--text3:#5C6A8A;
+  --grad:linear-gradient(135deg,#3D5AFE,#00C48C);
+  --grad2:linear-gradient(135deg,#0A0F1E,#141B30);
+  --shadow:0 4px 24px rgba(0,0,0,.3);--shadow-lg:0 8px 48px rgba(0,0,0,.4);
+  --radius:12px;--radius-lg:20px;--radius-xl:28px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden;line-height:1.6}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--dark2)}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 5%;height:70px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(10,15,30,.95);border-bottom-color:var(--border);backdrop-filter:blur(20px)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:36px;height:36px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff}
+.nav-logo-text{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-cta{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;border:none;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.2)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 4px 20px rgba(61,90,254,.35)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(61,90,254,.5)}
+.btn-primary:active{transform:none}
+.btn-lg{padding:14px 32px;font-size:16px;border-radius:14px}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid var(--border2)}
+.btn-outline:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3)}
+.btn-green{background:linear-gradient(135deg,#00C48C,#00A878);color:#fff;box-shadow:0 4px 20px rgba(0,196,140,.3)}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(0,196,140,.45)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:120px 5% 80px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(61,90,254,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(0,196,140,.12) 0%,transparent 50%),var(--dark)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%)}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(61,90,254,.15);border:1px solid rgba(61,90,254,.3);border-radius:100px;padding:6px 16px;font-size:13px;color:#8CA3FF;margin-bottom:24px;animation:fadeUp .6s ease both}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+.hero-title{font-size:clamp(36px,4.5vw,58px);font-weight:900;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;animation:fadeUp .6s .1s ease both}
+.hero-title span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:18px;color:var(--text2);line-height:1.7;margin-bottom:36px;animation:fadeUp .6s .2s ease both}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;animation:fadeUp .6s .3s ease both}
+.hero-checks{display:flex;flex-wrap:wrap;gap:16px;animation:fadeUp .6s .4s ease both}
+.hero-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
+.hero-check .ic{width:20px;height:20px;background:rgba(0,196,140,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.hero-visual{position:relative;animation:fadeUp .8s .2s ease both}
+.hero-mockup{background:linear-gradient(145deg,#141B30,#0F1628);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:20px;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden}
+.hero-mockup::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(61,90,254,.5),transparent)}
+.mockup-bar{display:flex;align-items:center;gap:6px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.mockup-dot{width:10px;height:10px;border-radius:50%}
+.mockup-title{font-size:12px;color:var(--text3);margin-left:8px;font-weight:500}
+.mockup-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.mock-stat{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px}
+.mock-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.mock-stat-val{font-size:20px;font-weight:800}
+.mock-stat-val.green{color:var(--green)}
+.mock-stat-val.blue{color:#7B9FFF}
+.mock-stat-val.amber{color:#FFB020}
+.mock-stat-val.red{color:#FF5C72}
+.mock-stat-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.mock-bar-section{margin-bottom:14px}
+.mock-bar-title{font-size:11px;color:var(--text3);margin-bottom:8px}
+.mock-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.mock-bar-label{font-size:10px;color:var(--text2);width:70px;flex-shrink:0}
+.mock-bar-wrap{flex:1;background:rgba(255,255,255,.06);border-radius:20px;height:6px;overflow:hidden}
+.mock-bar-fill{height:100%;border-radius:20px}
+.mock-items{display:flex;flex-direction:column;gap:6px}
+.mock-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+.mock-item-name{font-size:11px;font-weight:600}
+.mock-item-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700}
+.badge-green{background:rgba(0,196,140,.15);color:#00C48C}
+.badge-amber{background:rgba(255,176,32,.15);color:#FFB020}
+.badge-red{background:rgba(255,92,114,.15);color:#FF5C72}
+.hero-float-1,.hero-float-2{position:absolute;background:var(--dark3);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow);animation:float 4s ease-in-out infinite}
+.hero-float-1{top:-20px;right:-20px;animation-delay:0s}
+.hero-float-2{bottom:20px;left:-30px;animation-delay:2s}
+.float-label{font-size:10px;color:var(--text3);margin-bottom:2px}
+.float-val{font-size:14px;font-weight:700;color:var(--green)}
+
+/* SECTIONS */
+section{padding:100px 5%}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-badge{display:inline-block;background:rgba(61,90,254,.12);border:1px solid rgba(61,90,254,.25);color:#8CA3FF;font-size:12px;font-weight:600;padding:5px 14px;border-radius:100px;margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em}
+.section-title{font-size:clamp(28px,3.5vw,44px);font-weight:900;letter-spacing:-1px;margin-bottom:16px;line-height:1.15}
+.section-sub{font-size:17px;color:var(--text2);max-width:580px;line-height:1.7}
+.section-header{text-align:center;margin-bottom:64px}
+.section-header .section-sub{margin:0 auto}
+
+/* PROBLEMAS */
+.problems{background:var(--dark2)}
+.problems-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.problem-card{background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .3s;position:relative;overflow:hidden}
+.problem-card:hover{border-color:rgba(61,90,254,.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.problem-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(61,90,254,.05),transparent);opacity:0;transition:opacity .3s}
+.problem-card:hover::after{opacity:1}
+.problem-icon{font-size:28px;margin-bottom:14px}
+.problem-before{font-size:13px;color:#FF5C72;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.problem-after{font-size:13px;color:var(--green);font-weight:600;margin-top:8px;display:flex;align-items:center;gap:6px}
+.problem-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.problem-desc{font-size:13px;color:var(--text2);line-height:1.6}
+.divider-line{width:40px;height:1px;background:var(--border2);margin:10px 0}
+
+/* BENEFICIOS */
+.benefits-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.benefit-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .3s;cursor:default}
+.benefit-card:hover{border-color:rgba(0,196,140,.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,196,140,.08)}
+.benefit-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.benefit-title{font-size:15px;font-weight:700;margin-bottom:8px}
+.benefit-desc{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* MOCKUPS */
+.mockups{background:var(--dark2)}
+.mockups-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:48px;flex-wrap:wrap}
+.mockup-tab{padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border2);color:var(--text2);transition:all .2s;background:transparent}
+.mockup-tab.active,.mockup-tab:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.mockup-showcase{background:var(--dark3);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:32px;box-shadow:var(--shadow-lg);max-width:900px;margin:0 auto;position:relative;overflow:hidden}
+.mockup-showcase::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.showcase-bar{display:flex;align-items:center;gap:6px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.showcase-content{display:none;animation:fadeUp .3s ease}
+.showcase-content.active{display:block}
+.showcase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.showcase-stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px}
+.showcase-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.showcase-stat-val{font-size:22px;font-weight:800}
+.showcase-table{width:100%;border-collapse:collapse;font-size:12px}
+.showcase-table th{text-align:left;padding:8px 12px;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.showcase-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2)}
+.showcase-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* QUIEN */
+.quien{background:var(--dark3)}
+.quien-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.quien-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;text-align:center;transition:all .3s}
+.quien-card:hover{border-color:rgba(61,90,254,.3);transform:translateY(-4px)}
+.quien-icon{font-size:36px;margin-bottom:12px}
+.quien-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.quien-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* FUNCIONALIDADES */
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.feature-item{display:flex;align-items:flex-start;gap:14px;padding:20px;background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius-lg);transition:all .3s}
+.feature-item:hover{border-color:rgba(61,90,254,.25);background:rgba(61,90,254,.04)}
+.feature-ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.feature-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.feature-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* TESTIMONIOS */
+.testimonios{background:var(--dark2)}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.test-card{background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .3s}
+.test-card:hover{border-color:rgba(61,90,254,.25);transform:translateY(-4px)}
+.test-stars{color:#FFB020;font-size:14px;margin-bottom:14px;letter-spacing:2px}
+.test-text{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px;font-style:italic}
+.test-author{display:flex;align-items:center;gap:12px}
+.test-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.test-name{font-size:14px;font-weight:700}
+.test-role{font-size:12px;color:var(--text3)}
+
+/* COMPARACION */
+.compare{background:var(--dark3)}
+.compare-table{max-width:700px;margin:0 auto;background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg)}
+.compare-head{display:grid;grid-template-columns:2fr 1fr 1fr;background:var(--dark3);padding:16px 24px;border-bottom:1px solid var(--border)}
+.compare-head-item{font-size:13px;font-weight:700;text-align:center}
+.compare-head-item:first-child{text-align:left}
+.compare-head-item.stockea{color:var(--green)}
+.compare-row{display:grid;grid-template-columns:2fr 1fr 1fr;padding:14px 24px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center;transition:background .2s}
+.compare-row:hover{background:rgba(255,255,255,.02)}
+.compare-row:last-child{border-bottom:none}
+.compare-feature{font-size:13px;color:var(--text2)}
+.compare-val{text-align:center;font-size:16px}
+.compare-val.yes{color:var(--green)}
+.compare-val.no{color:var(--text3)}
+.compare-col-stockea{background:rgba(61,90,254,.04)}
+
+/* PRECIOS */
+.precio{background:var(--dark2)}
+.precio-wrapper{max-width:520px;margin:0 auto;position:relative}
+.precio-glow{position:absolute;inset:-2px;background:var(--grad);border-radius:calc(var(--radius-xl) + 2px);opacity:.6;filter:blur(8px);z-index:0}
+.precio-card{position:relative;z-index:1;background:var(--dark3);border:1px solid rgba(61,90,254,.4);border-radius:var(--radius-xl);padding:48px;text-align:center;overflow:hidden}
+.precio-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.precio-badge{display:inline-block;background:var(--grad);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:20px;text-transform:uppercase;letter-spacing:.08em}
+.precio-name{font-size:20px;font-weight:800;margin-bottom:8px}
+.precio-amount{font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.precio-period{font-size:15px;color:var(--text2);margin-bottom:32px}
+.precio-features{text-align:left;margin-bottom:36px}
+.precio-feature{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+.precio-feature:last-child{border-bottom:none}
+.precio-feature .ic{color:var(--green);font-size:16px;flex-shrink:0}
+.precio-trial{font-size:13px;color:var(--text3);margin-top:16px}
+
+/* FAQ */
+.faq-list{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.faq-q{padding:20px 24px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;transition:background .2s;user-select:none}
+.faq-q:hover{background:rgba(255,255,255,.03)}
+.faq-arrow{font-size:18px;color:var(--text3);transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg);color:var(--blue)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;padding:0 24px;font-size:14px;color:var(--text2);line-height:1.7}
+.faq-item.open .faq-a{max-height:200px;padding:0 24px 20px}
+
+/* CTA FINAL */
+.cta-final{background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(61,90,254,.2) 0%,transparent 70%),var(--dark);text-align:center;padding:120px 5%}
+.cta-final .section-title{font-size:clamp(32px,4vw,52px)}
+.cta-final .section-sub{font-size:18px;margin:20px auto 40px;max-width:560px}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+/* FOOTER */
+footer{background:var(--dark2);border-top:1px solid var(--border);padding:60px 5% 40px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand p{font-size:13px;color:var(--text3);line-height:1.7;margin-top:12px;max-width:260px}
+.footer-col h4{font-size:13px;font-weight:700;color:#fff;margin-bottom:16px;text-transform:uppercase;letter-spacing:.06em}
+.footer-col a{display:block;font-size:13px;color:var(--text3);text-decoration:none;margin-bottom:10px;transition:color .2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:12px;color:var(--text3)}
+.footer-social{display:flex;gap:12px}
+.social-link{width:34px;height:34px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;transition:all .2s}
+.social-link:hover{background:var(--blue);border-color:var(--blue)}
+.whatsapp-btn{position:fixed;bottom:24px;right:24px;background:#25D366;color:#fff;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px rgba(37,211,102,.4);text-decoration:none;z-index:999;transition:transform .2s}
+.whatsapp-btn:hover{transform:scale(1.1)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .benefits-grid,.features-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  nav{padding:0 4%}
+  .nav-links{display:none}
+  .hero-content{grid-template-columns:1fr;gap:40px;text-align:center}
+  .hero-btns,.hero-checks{justify-content:center}
+  .hero-visual{order:-1}
+  .problems-grid,.test-grid,.quien-grid{grid-template-columns:1fr 1fr}
+  .benefits-grid,.features-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  section{padding:70px 4%}
+}
+@media(max-width:480px){
+  .problems-grid,.test-grid,.quien-grid{grid-template-columns:1fr}
+  .hero-title{font-size:32px}
+  .mockups-tabs{gap:6px}
+  .mockup-tab{padding:6px 14px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">S</div>
+    <span class="nav-logo-text">Stockea</span>
+  </a>
+  <div class="nav-links">
+    <a href="#problemas">Problemas</a>
+    <a href="#beneficios">Beneficios</a>
+    <a href="#funciones">Funciones</a>
+    <a href="#precios">Precios</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div class="nav-cta">
+    <a href="app.html" class="btn btn-ghost">Iniciar sesión</a>
+    <a href="app.html" class="btn btn-primary">Probar gratis →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge"><span class="dot"></span> Más de 14 días gratis para probarlo</div>
+      <h1 class="hero-title">Controlá todo tu negocio desde <span>un solo lugar</span></h1>
+      <p class="hero-sub">Stock, ventas, clientes, proveedores, caja y reportes en tiempo real para comercios y PyMEs.</p>
+      <div class="hero-btns">
+        <a href="app.html" class="btn btn-primary btn-lg">Probar gratis 14 días →</a>
+        <a href="https://wa.me/5493625661547?text=Hola!%20Quiero%20una%20demo%20de%20Stockea" class="btn btn-outline btn-lg" target="_blank">Solicitar demo</a>
+      </div>
+      <div class="hero-checks">
+        <div class="hero-check"><div class="ic">✓</div> Control de stock</div>
+        <div class="hero-check"><div class="ic">✓</div> Ventas rápidas</div>
+        <div class="hero-check"><div class="ic">✓</div> Reportes inteligentes</div>
+        <div class="hero-check"><div class="ic">✓</div> Gestión financiera</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dot" style="background:#FF5C72"></div>
+          <div class="mockup-dot" style="background:#FFB020"></div>
+          <div class="mockup-dot" style="background:#00C48C"></div>
+          <span class="mockup-title">Stockea — Dashboard</span>
+        </div>
+        <div class="mockup-stats">
+          <div class="mock-stat"><div class="mock-stat-label">Ventas del mes</div><div class="mock-stat-val green">$847.500</div><div class="mock-stat-sub">↑ 23% vs mes anterior</div></div>
+          <div class="mock-stat"><div class="mock-stat-label">Utilidad neta</div><div class="mock-stat-val blue">$312.000</div><div class="mock-stat-sub">Margen: 37%</div></div>
+          <div class="mock-stat"><div class="mock-stat-label">Productos en stock</div><div class="mock-stat-val amber">248 ud.</div><div class="mock-stat-sub">3 con stock crítico</div></div>
+          <div class="mock-stat"><div class="mock-stat-label">Clientes activos</div><div class="mock-stat-val" style="color:#B06FFF">64</div><div class="mock-stat-sub">8 con saldo deudor</div></div>
+        </div>
+        <div class="mock-bar-section">
+          <div class="mock-bar-title">Ventas por categoría</div>
+          <div class="mock-bar-row"><span class="mock-bar-label">Electrónica</span><div class="mock-bar-wrap"><div class="mock-bar-fill" style="width:85%;background:linear-gradient(90deg,#3D5AFE,#6B87FF)"></div></div></div>
+          <div class="mock-bar-row"><span class="mock-bar-label">Indumentaria</span><div class="mock-bar-wrap"><div class="mock-bar-fill" style="width:62%;background:linear-gradient(90deg,#00C48C,#00E6A8)"></div></div></div>
+          <div class="mock-bar-row"><span class="mock-bar-label">Herramientas</span><div class="mock-bar-wrap"><div class="mock-bar-fill" style="width:44%;background:linear-gradient(90deg,#FFB020,#FFD060)"></div></div></div>
+        </div>
+        <div class="mock-items">
+          <div class="mock-item"><span class="mock-item-name">iPhone 15 Pro</span><span class="mock-item-badge badge-green">Stock: 12</span></div>
+          <div class="mock-item"><span class="mock-item-name">Auriculares BT</span><span class="mock-item-badge badge-amber">Stock: 3</span></div>
+          <div class="mock-item"><span class="mock-item-name">Cable USB-C</span><span class="mock-item-badge badge-red">Sin stock</span></div>
+        </div>
+      </div>
+      <div class="hero-float-1"><div class="float-label">Última venta</div><div class="float-val">+$12.500 ✓</div></div>
+      <div class="hero-float-2"><div class="float-label">Stock alertas</div><div class="float-val" style="color:#FFB020">⚠ 3 productos</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMAS -->
+<section class="problems" id="problemas">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Problemas que resolvemos</div>
+      <h2 class="section-title">¿Te identificás con alguno de estos?</h2>
+      <p class="section-sub">Cada día que no tenés control de tu negocio, perdés dinero. Stockea lo resuelve.</p>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon">📦</div>
+        <div class="problem-before">✗ Antes: No sabés cuánto stock queda</div>
+        <div class="divider-line"></div>
+        <div class="problem-after">✓ Con Stockea: Stock en tiempo real con alertas automáticas</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">💸</div>
+        <div class="problem-before">✗ Antes: Perdés ventas por desorganización</div>
+        <div class="divider-line"></div>
+        <div class="problem-after">✓ Con Stockea: Ventas registradas al instante con escáner</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">📊</div>
+        <div class="problem-before">✗ Antes: Manejás clientes en un cuaderno o Excel</div>
+        <div class="divider-line"></div>
+        <div class="problem-after">✓ Con Stockea: CRM completo con historial y deudas</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">💰</div>
+        <div class="problem-before">✗ Antes: No conocés tus ganancias reales</div>
+        <div class="divider-line"></div>
+        <div class="problem-after">✓ Con Stockea: Reportes automáticos de rentabilidad</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">🗃️</div>
+        <div class="problem-before">✗ Antes: Errores de caja y descuadres frecuentes</div>
+        <div class="divider-line"></div>
+        <div class="problem-after">✓ Con Stockea: Libro de caja automático y ordenado</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">🌀</div>
+        <div class="problem-before">✗ Antes: Información dispersa en papeles y apps</div>
+        <div class="divider-line"></div>
+        <div class="problem-after">✓ Con Stockea: Todo centralizado en un solo sistema</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFICIOS -->
+<section id="beneficios">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Beneficios</div>
+      <h2 class="section-title">Todo lo que necesitás para crecer</h2>
+      <p class="section-sub">No describimos funciones. Te mostramos resultados reales para tu negocio.</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(61,90,254,.15)">📦</div>
+        <div class="benefit-title">Inventario inteligente</div>
+        <div class="benefit-desc">Sabés exactamente qué tenés, dónde está y cuándo reponer. Nunca más perdés una venta por falta de stock.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(0,196,140,.15)">⚡</div>
+        <div class="benefit-title">Ventas más rápidas</div>
+        <div class="benefit-desc">Registrá una venta en segundos con el escáner de códigos. Menos tiempo en la caja, más tiempo para atender clientes.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(255,176,32,.15)">👥</div>
+        <div class="benefit-title">Clientes que vuelven</div>
+        <div class="benefit-desc">Historial completo de cada cliente, deudas, preferencias y seguimiento. Fidelizá con datos reales.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(176,111,255,.15)">🚚</div>
+        <div class="benefit-title">Proveedores bajo control</div>
+        <div class="benefit-desc">Gestioná tus deudas con proveedores, condiciones de pago y contactos. Negociá con información.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(255,92,114,.15)">💵</div>
+        <div class="benefit-title">Caja siempre cuadrada</div>
+        <div class="benefit-desc">Movimientos automáticos de ingresos y egresos. Sabés en todo momento cuánto dinero tenés disponible.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(0,196,140,.15)">📈</div>
+        <div class="benefit-title">Reportes que te hablan</div>
+        <div class="benefit-desc">Gráficos claros de ventas, gastos, rentabilidad y tendencias. Tomá decisiones con datos, no con intuición.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(61,90,254,.15)">💳</div>
+        <div class="benefit-title">Cuentas corrientes</div>
+        <div class="benefit-desc">Llevá el control de deudas de clientes, proveedores y empleados. Cada peso, registrado y trazado.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon" style="background:rgba(255,176,32,.15)">👷</div>
+        <div class="benefit-title">Equipo gestionado</div>
+        <div class="benefit-desc">Registrá empleados, sueldos, anticipos y movimientos. Tu equipo, ordenado como tu negocio.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOCKUPS DEL SISTEMA -->
+<section class="mockups">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">El sistema por dentro</div>
+      <h2 class="section-title">Mirá cómo se ve Stockea</h2>
+      <p class="section-sub">Diseño moderno, intuitivo y pensado para que cualquiera pueda usarlo desde el primer día.</p>
+    </div>
+    <div class="mockups-tabs reveal">
+      <button class="mockup-tab active" onclick="switchTab('dashboard',this)">Dashboard</button>
+      <button class="mockup-tab" onclick="switchTab('inventario',this)">Inventario</button>
+      <button class="mockup-tab" onclick="switchTab('ventas',this)">Ventas</button>
+      <button class="mockup-tab" onclick="switchTab('clientes',this)">Clientes</button>
+      <button class="mockup-tab" onclick="switchTab('reportes',this)">Reportes</button>
+    </div>
+    <div class="mockup-showcase reveal">
+      <div class="showcase-bar">
+        <div class="mockup-dot" style="background:#FF5C72"></div>
+        <div class="mockup-dot" style="background:#FFB020"></div>
+        <div class="mockup-dot" style="background:#00C48C"></div>
+        <span style="font-size:12px;color:#5C6A8A;margin-left:10px;font-weight:500" id="tab-title">Stockea — Dashboard</span>
+      </div>
+      <div class="showcase-content active" id="sc-dashboard">
+        <div class="showcase-grid">
+          <div class="showcase-stat"><div class="showcase-stat-label">Ventas del mes</div><div class="showcase-stat-val" style="color:#00C48C">$847.500</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Utilidad neta</div><div class="showcase-stat-val" style="color:#7B9FFF">$312.000</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Productos activos</div><div class="showcase-stat-val" style="color:#FFB020">248</div></div>
+        </div>
+        <table class="showcase-table">
+          <thead><tr><th>Últimas ventas</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>iPhone 15 Pro 128GB</td><td>Martínez Juan</td><td style="color:#00C48C;font-weight:700">$320.000</td><td><span style="background:rgba(0,196,140,.15);color:#00C48C;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Completada</span></td></tr>
+            <tr><td>Auriculares Sony WH-1000</td><td>García Ana</td><td style="color:#00C48C;font-weight:700">$85.000</td><td><span style="background:rgba(0,196,140,.15);color:#00C48C;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Completada</span></td></tr>
+            <tr><td>Remera Nike Talle L</td><td>López Pedro</td><td style="color:#FFB020;font-weight:700">$18.500</td><td><span style="background:rgba(255,176,32,.15);color:#FFB020;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Pendiente</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="showcase-content" id="sc-inventario">
+        <div class="showcase-grid">
+          <div class="showcase-stat"><div class="showcase-stat-label">Total productos</div><div class="showcase-stat-val" style="color:#7B9FFF">248</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Valor inventario</div><div class="showcase-stat-val" style="color:#00C48C">$2.4M</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Stock crítico</div><div class="showcase-stat-val" style="color:#FF5C72">3 ⚠</div></div>
+        </div>
+        <table class="showcase-table">
+          <thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>P. Venta</th><th>Margen</th></tr></thead>
+          <tbody>
+            <tr><td>iPhone 15 Pro 128GB</td><td><span style="background:rgba(61,90,254,.15);color:#7B9FFF;padding:2px 8px;border-radius:20px;font-size:10px">Electrónica</span></td><td style="color:#00C48C;font-weight:700">12</td><td>$320.000</td><td style="color:#00C48C">28%</td></tr>
+            <tr><td>Cable USB-C 2m</td><td><span style="background:rgba(61,90,254,.15);color:#7B9FFF;padding:2px 8px;border-radius:20px;font-size:10px">Accesorios</span></td><td style="color:#FF5C72;font-weight:700">0 ⚠</td><td>$4.500</td><td style="color:#00C48C">55%</td></tr>
+            <tr><td>Remera Nike Dry-Fit L</td><td><span style="background:rgba(0,196,140,.15);color:#00C48C;padding:2px 8px;border-radius:20px;font-size:10px">Indumentaria</span></td><td style="color:#FFB020;font-weight:700">2 ⚠</td><td>$18.500</td><td style="color:#00C48C">42%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="showcase-content" id="sc-ventas">
+        <div class="showcase-grid">
+          <div class="showcase-stat"><div class="showcase-stat-label">Ventas hoy</div><div class="showcase-stat-val" style="color:#00C48C">$124.000</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">N° transacciones</div><div class="showcase-stat-val" style="color:#7B9FFF">14</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Ticket promedio</div><div class="showcase-stat-val" style="color:#FFB020">$8.857</div></div>
+        </div>
+        <table class="showcase-table">
+          <thead><tr><th>Fecha</th><th>Producto</th><th>Cliente</th><th>Total</th><th>Pago</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#5C6A8A">10/06</td><td>iPhone 15 Pro</td><td>Martínez J.</td><td style="color:#00C48C;font-weight:700">$320.000</td><td><span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:20px;font-size:10px">Transferencia</span></td></tr>
+            <tr><td style="color:#5C6A8A">10/06</td><td>Auriculares Sony</td><td>García A.</td><td style="color:#00C48C;font-weight:700">$85.000</td><td><span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:20px;font-size:10px">Efectivo</span></td></tr>
+            <tr><td style="color:#5C6A8A">09/06</td><td>Remera Nike L</td><td>Sin cliente</td><td style="color:#00C48C;font-weight:700">$18.500</td><td><span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:20px;font-size:10px">Mercado Pago</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="showcase-content" id="sc-clientes">
+        <div class="showcase-grid">
+          <div class="showcase-stat"><div class="showcase-stat-label">Total clientes</div><div class="showcase-stat-val" style="color:#7B9FFF">64</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Total facturado</div><div class="showcase-stat-val" style="color:#00C48C">$4.2M</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Saldo deudor</div><div class="showcase-stat-val" style="color:#FF5C72">$48.000</div></div>
+        </div>
+        <table class="showcase-table">
+          <thead><tr><th>Cliente</th><th>Tipo</th><th>Compras</th><th>Total gastado</th><th>Saldo</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600">Martínez Juan</td><td><span style="background:rgba(61,90,254,.15);color:#7B9FFF;padding:2px 8px;border-radius:20px;font-size:10px">Mayorista</span></td><td>24</td><td style="color:#00C48C;font-weight:700">$1.280.000</td><td style="color:#00C48C">$0 ✓</td></tr>
+            <tr><td style="font-weight:600">García Ana</td><td><span style="background:rgba(0,196,140,.15);color:#00C48C;padding:2px 8px;border-radius:20px;font-size:10px">Minorista</span></td><td>8</td><td style="color:#00C48C;font-weight:700">$340.000</td><td style="color:#FFB020">$12.000 ⚠</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="showcase-content" id="sc-reportes">
+        <div class="showcase-grid">
+          <div class="showcase-stat"><div class="showcase-stat-label">Margen neto</div><div class="showcase-stat-val" style="color:#00C48C">37%</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Mejor producto</div><div class="showcase-stat-val" style="color:#7B9FFF;font-size:14px">iPhone 15</div></div>
+          <div class="showcase-stat"><div class="showcase-stat-label">Crecimiento</div><div class="showcase-stat-val" style="color:#00C48C">+23%</div></div>
+        </div>
+        <table class="showcase-table">
+          <thead><tr><th>Mes</th><th>Ingresos</th><th>Gastos</th><th>Utilidad</th><th>Margen</th></tr></thead>
+          <tbody>
+            <tr><td>Junio 2026</td><td style="color:#00C48C;font-weight:700">$847.500</td><td style="color:#FF5C72">$535.500</td><td style="color:#00C48C;font-weight:700">$312.000</td><td style="color:#00C48C;font-weight:700">37%</td></tr>
+            <tr><td>Mayo 2026</td><td style="color:#00C48C;font-weight:700">$687.000</td><td style="color:#FF5C72">$459.800</td><td style="color:#00C48C;font-weight:700">$227.200</td><td style="color:#00C48C;font-weight:700">33%</td></tr>
+            <tr><td>Abril 2026</td><td style="color:#00C48C;font-weight:700">$612.000</td><td style="color:#FF5C72">$428.400</td><td style="color:#00C48C;font-weight:700">$183.600</td><td style="color:#00C48C;font-weight:700">30%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA QUIEN -->
+<section class="quien" id="quien">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">¿Para quién es?</div>
+      <h2 class="section-title">Stockea es para tu tipo de negocio</h2>
+      <p class="section-sub">Diseñado para comercios reales, no para corporaciones. Simple de usar, potente de verdad.</p>
+    </div>
+    <div class="quien-grid">
+      <div class="quien-card reveal"><div class="quien-icon">🏪</div><div class="quien-title">Kioscos y almacenes</div><div class="quien-desc">Controlá stock de golosinas, bebidas y artículos de manera ágil con escáner de barras.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">🔧</div><div class="quien-title">Ferreterías</div><div class="quien-desc">Gestioná miles de productos, proveedores y presupuestos para clientes en segundos.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">👗</div><div class="quien-title">Tiendas de ropa</div><div class="quien-desc">Talles, colores, temporadas y clientes VIP. Todo bajo control con cuentas corrientes.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">🚛</div><div class="quien-title">Distribuidoras</div><div class="quien-desc">Rutas, pedidos, facturación y cobros organizados. Escalá sin perder el control.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">🔩</div><div class="quien-title">Repuestos y autopartes</div><div class="quien-desc">Catálogo masivo de piezas con códigos, proveedores y historial de ventas detallado.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">🛒</div><div class="quien-title">Comercios minoristas</div><div class="quien-desc">Desde la apertura de caja hasta el cierre del día. Stockea lo maneja todo por vos.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">👨‍👩‍👧</div><div class="quien-title">Negocios familiares</div><div class="quien-desc">Fácil para todos los miembros del equipo. Sin capacitación larga ni complicaciones.</div></div>
+      <div class="quien-card reveal"><div class="quien-icon">📱</div><div class="quien-title">Vendedores online</div><div class="quien-desc">Inventario sincronizado y ventas registradas desde cualquier dispositivo, en cualquier lugar.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONALIDADES -->
+<section id="funciones" style="background:var(--dark2)">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Funcionalidades</div>
+      <h2 class="section-title">Todo incluido, sin sorpresas</h2>
+      <p class="section-sub">Un sistema completo que crece con tu negocio. Sin límites artificiales.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(61,90,254,.15)">📦</div><div><div class="feature-title">Stock en tiempo real</div><div class="feature-desc">Actualizaciones instantáneas con cada venta. Alertas cuando el stock baja del mínimo.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(0,196,140,.15)">📷</div><div><div class="feature-title">Escáner de códigos</div><div class="feature-desc">Usá la cámara del celular para escanear cualquier producto al instante.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(255,176,32,.15)">💵</div><div><div class="feature-title">Control de caja</div><div class="feature-desc">Libro de caja automático con ingresos, egresos y saldo en tiempo real.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(176,111,255,.15)">👥</div><div><div class="feature-title">CRM de clientes</div><div class="feature-desc">Historial completo, cuentas corrientes y seguimiento de cada cliente.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(255,92,114,.15)">🚚</div><div><div class="feature-title">Gestión de proveedores</div><div class="feature-desc">Deudas, condiciones de pago y contactos organizados en un solo lugar.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(0,196,140,.15)">📋</div><div><div class="feature-title">Presupuestos</div><div class="feature-desc">Creá y enviá presupuestos profesionales. Convertílos en ventas con un clic.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(61,90,254,.15)">📈</div><div><div class="feature-title">Reportes avanzados</div><div class="feature-desc">Gráficos de ventas, márgenes, productos más rentables y comparativas mensuales.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(255,176,32,.15)">💳</div><div><div class="feature-title">Cuentas corrientes</div><div class="feature-desc">Cargos, abonos y saldos para clientes, proveedores y empleados.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(176,111,255,.15)">🖨️</div><div><div class="feature-title">Facturas y tickets PDF</div><div class="feature-desc">Imprimí tickets de caja y facturas profesionales directamente desde el sistema.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(0,196,140,.15)">📱</div><div><div class="feature-title">App móvil (PWA)</div><div class="feature-desc">Instalá Stockea en tu celular y usalo como una app nativa, sin Play Store.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(255,92,114,.15)">☁️</div><div><div class="feature-title">Datos en la nube</div><div class="feature-desc">Accedé desde cualquier dispositivo. Tus datos seguros y respaldados siempre.</div></div></div>
+      <div class="feature-item reveal"><div class="feature-ic" style="background:rgba(61,90,254,.15)">👷</div><div><div class="feature-title">Gestión de empleados</div><div class="feature-desc">Sueldos, anticipos y movimientos de cada miembro de tu equipo.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIOS -->
+<section class="testimonios">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Testimonios</div>
+      <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+      <p class="section-sub">Negocios reales que transformaron su gestión con Stockea.</p>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"Antes manejaba todo en papel y Excel. Hoy sé exactamente cuánto tengo en stock, cuánto vendí y cuánto gané. Stockea me cambió el negocio."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,#3D5AFE,#00C48C)">MR</div>
+          <div><div class="test-name">Marcos Rodríguez</div><div class="test-role">Ferretería Central — Resistencia, Chaco</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"El escáner de códigos es increíble. Registro ventas en segundos y mis clientes se van más rápido. Ya no me quedo sin stock de lo que más vendo."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,#9C27B0,#3D5AFE)">LG</div>
+          <div><div class="test-name">Laura García</div><div class="test-role">Kiosco y Librería — Corrientes</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"Las cuentas corrientes me salvaron. Sé exactamente quién me debe, cuánto y desde cuándo. Cobro más y pierdo menos. Muy recomendable."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,#FF6D00,#FFB020)">CP</div>
+          <div><div class="test-name">Carlos Pérez</div><div class="test-role">Distribuidora de Alimentos — Formosa</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARACION -->
+<section class="compare">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Comparación</div>
+      <h2 class="section-title">Stockea vs Excel</h2>
+      <p class="section-sub">Excel es una hoja de cálculo. Stockea es un sistema de gestión profesional.</p>
+    </div>
+    <div class="compare-table reveal">
+      <div class="compare-head">
+        <div class="compare-head-item">Característica</div>
+        <div class="compare-head-item">Excel</div>
+        <div class="compare-head-item stockea">✦ Stockea</div>
+      </div>
+      <div class="compare-row"><div class="compare-feature">Control de stock en tiempo real</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Alertas de stock mínimo</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Reportes automáticos</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">CRM de clientes integrado</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Caja automática</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Escáner de códigos de barras</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Acceso desde celular</div><div class="compare-val no">Limitado</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Datos en la nube seguros</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Cuentas corrientes</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+      <div class="compare-row"><div class="compare-feature">Facturas y tickets PDF</div><div class="compare-val no">✗</div><div class="compare-val yes compare-col-stockea">✓</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRECIOS -->
+<section class="precio" id="precios">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Precio simple</div>
+      <h2 class="section-title">Un solo plan, todo incluido</h2>
+      <p class="section-sub">Sin sorpresas ni costos ocultos. Acceso completo a todas las funciones desde el día uno.</p>
+    </div>
+    <div class="precio-wrapper reveal">
+      <div class="precio-glow"></div>
+      <div class="precio-card">
+        <div class="precio-badge">⭐ Plan Profesional</div>
+        <div class="precio-name">Stockea Pro</div>
+        <div class="precio-amount">$15.000</div>
+        <div class="precio-period">ARS por mes · Cancelá cuando quieras</div>
+        <div class="precio-features">
+          <div class="precio-feature"><span class="ic">✓</span> Todas las funcionalidades incluidas</div>
+          <div class="precio-feature"><span class="ic">✓</span> Stock, ventas, clientes y proveedores</div>
+          <div class="precio-feature"><span class="ic">✓</span> Cuentas corrientes y empleados</div>
+          <div class="precio-feature"><span class="ic">✓</span> Reportes avanzados y gráficos</div>
+          <div class="precio-feature"><span class="ic">✓</span> Facturas y tickets en PDF</div>
+          <div class="precio-feature"><span class="ic">✓</span> Escáner de códigos de barras</div>
+          <div class="precio-feature"><span class="ic">✓</span> App móvil instalable (PWA)</div>
+          <div class="precio-feature"><span class="ic">✓</span> Datos en la nube seguros</div>
+          <div class="precio-feature"><span class="ic">✓</span> Actualizaciones incluidas</div>
+          <div class="precio-feature"><span class="ic">✓</span> Soporte por WhatsApp</div>
+        </div>
+        <a href="app.html" class="btn btn-primary btn-lg" style="width:100%;justify-content:center">Comenzar ahora →</a>
+        <p class="precio-trial">🎁 14 días de prueba gratis · Sin tarjeta de crédito</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background:var(--dark2)">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-badge">Preguntas frecuentes</div>
+      <h2 class="section-title">Todo lo que necesitás saber</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Necesito instalar algo en mi computadora? <span class="faq-arrow">▾</span></div><div class="faq-a">No. Stockea funciona 100% desde el navegador web. Solo necesitás internet y ya podés empezar. También podés instalarlo como app en tu celular con un solo toque, sin pasar por ninguna tienda de aplicaciones.</div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Puedo usarlo desde el celular? <span class="faq-arrow">▾</span></div><div class="faq-a">Sí, Stockea está optimizado para móviles y se puede instalar como una app nativa (PWA) en Android e iPhone. Funciona en pantalla completa, igual que una app descargada.</div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Puedo probarlo antes de pagar? <span class="faq-arrow">▾</span></div><div class="faq-a">Por supuesto. Tenés 14 días de prueba gratis con acceso completo a todas las funciones. Sin tarjeta de crédito. Si no te convence, no pagás nada.</div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Hay soporte si tengo dudas? <span class="faq-arrow">▾</span></div><div class="faq-a">Sí. Tenés soporte directo por WhatsApp. Te respondemos rápido y te ayudamos a configurar el sistema para tu tipo de negocio.</div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Mis datos están seguros? <span class="faq-arrow">▾</span></div><div class="faq-a">Tus datos se almacenan en Supabase, una plataforma de base de datos segura con cifrado y backups automáticos. Cada negocio solo puede acceder a sus propios datos gracias a Row Level Security.</div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Puedo cancelar cuando quiera? <span class="faq-arrow">▾</span></div><div class="faq-a">Sí, sin penalidades ni burocracia. Podés cancelar en cualquier momento. Tus datos permanecen disponibles durante el período pagado.</div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">¿Cómo se hace el pago? <span class="faq-arrow">▾</span></div><div class="faq-a">El pago se realiza mensualmente a través de Mercado Pago. Es rápido, seguro y podés pagar con tarjeta, transferencia o saldo de MP.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<div class="cta-final">
+  <div class="section-badge reveal" style="display:inline-block">Empezá hoy</div>
+  <h2 class="section-title reveal" style="margin-top:16px">Empezá a gestionar tu negocio<br>de manera profesional</h2>
+  <p class="section-sub reveal">Tomá el control de tus ventas, stock y finanzas desde hoy.<br>14 días gratis, sin tarjeta de crédito.</p>
+  <div class="cta-btns reveal">
+    <a href="app.html" class="btn btn-primary btn-lg">Probar gratis 14 días →</a>
+    <a href="https://wa.me/5493625661547?text=Hola!%20Quiero%20una%20demo%20de%20Stockea" class="btn btn-outline btn-lg" target="_blank">💬 Solicitar demo por WhatsApp</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo" style="margin-bottom:12px;display:inline-flex">
+          <div class="nav-logo-icon">S</div>
+          <span class="nav-logo-text">Stockea</span>
+        </a>
+        <p>Plataforma integral de gestión comercial para comercios y PyMEs. Stock, ventas, finanzas y más en un solo lugar.</p>
+        <div class="footer-social" style="margin-top:16px">
+          <a href="#" class="social-link">📘</a>
+          <a href="#" class="social-link">📸</a>
+          <a href="https://wa.me/5493625661547" class="social-link" target="_blank">💬</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="#beneficios">Beneficios</a>
+        <a href="#funciones">Funcionalidades</a>
+        <a href="#precios">Precios</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Negocio</h4>
+        <a href="#quien">Para quién</a>
+        <a href="#problemas">Problemas que resuelve</a>
+        <a href="app.html">Iniciar sesión</a>
+        <a href="app.html">Registro gratis</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="https://wa.me/5493625661547" target="_blank">💬 WhatsApp</a>
+        <a href="mailto:marianolucas01@hotmail.com">✉️ marianolucas01@hotmail.com</a>
+        <a href="#">Términos de uso</a>
+        <a href="#">Política de privacidad</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Stockea. Todos los derechos reservados.</p>
+      <p>Hecho con ❤️ para los comerciantes argentinos</p>
+    </div>
+  </div>
+</footer>
+
+<!-- WHATSAPP -->
+<a href="https://wa.me/5493625661547?text=Hola!%20Quiero%20información%20sobre%20Stockea" class="whatsapp-btn" target="_blank" title="Contactar por WhatsApp">💬</a>
+
+<script>
+// NAV SCROLL
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// REVEAL ON SCROLL
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// MOCKUP TABS
+function switchTab(id,btn){
+  document.querySelectorAll('.showcase-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.mockup-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+  btn.classList.add('active');
+  const titles={dashboard:'Stockea — Dashboard',inventario:'Stockea — Inventario',ventas:'Stockea — Ventas',clientes:'Stockea — Clientes',reportes:'Stockea — Reportes'};
+  document.getElementById('tab-title').textContent=titles[id]||'Stockea';
+}
+
+// FAQ
+function toggleFaq(el){
+  const item=el.parentElement;
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen)item.classList.add('open');
+}
+
+// SMOOTH SCROLL
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+</script>
+</body>
+</html>

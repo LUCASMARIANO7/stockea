@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3D5AFE"/>
+      <stop offset="100%" style="stop-color:#00C48C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <!-- S de Stockea -->
+  <text x="256" y="340" font-family="Arial Black, sans-serif" font-size="320" font-weight="900" 
+        fill="white" text-anchor="middle" opacity="0.95">S</text>
+  <!-- Punto verde abajo -->
+  <circle cx="380" cy="400" r="40" fill="#00C48C" opacity="0.9"/>
+</svg>
