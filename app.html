@@ -206,6 +206,26 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 .receipt-box{background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--radius);padding:1rem;font-family:'Fira Mono',monospace;font-size:12px;line-height:1.8}
 .divider{border:none;border-top:1px solid var(--border);margin:1rem 0}
 
+/* POS */
+.pos-prod-card{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;transition:all .15s;background:var(--bg2)}
+.pos-prod-card:hover{border-color:var(--blue);background:var(--blue-bg)}
+.pos-prod-card:active{transform:scale(.97)}
+.pos-prod-nombre{font-size:13px;font-weight:700;margin-bottom:2px}
+.pos-prod-sub{font-size:11px;color:var(--text3)}
+.pos-prod-precio{font-size:14px;font-weight:800;color:var(--blue);white-space:nowrap}
+.pos-prod-stock{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.pos-carrito-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;background:var(--bg2)}
+.pos-carrito-nombre{font-size:12px;font-weight:700;flex:1;line-height:1.3}
+.pos-carrito-precio{font-size:12px;color:var(--text2);white-space:nowrap}
+.pos-qty-wrap{display:flex;align-items:center;gap:4px}
+.pos-qty-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--text)}
+.pos-qty-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pos-qty-num{width:28px;text-align:center;font-size:13px;font-weight:700}
+.pos-metodo{border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);transition:all .15s}
+.pos-metodo.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pos-billete{padding:4px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);cursor:pointer;font-size:12px;font-weight:700;color:var(--text);transition:all .15s}
+.pos-billete:hover{background:var(--green);color:#fff;border-color:var(--green)}
+
 /* INSIGHTS IA */
 .insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .insight-card{border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);position:relative;overflow:hidden}
@@ -399,7 +419,7 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="db-badge"><span class="dot"></span>Conectado</div>
     <div class="topbar-date" id="fecha-hoy"></div>
-    <button class="btn btn-sm btn-primary" onclick="openModal('modal-venta')">⚡ Venta rápida</button>
+    <button class="btn btn-sm btn-primary" onclick="abrirPOS()">⚡ Venta rápida</button>
   </div>
   <!-- Banner trial dentro del app -->
   <div id="trial-banner-inner" style="display:none;background:linear-gradient(90deg,#3D5AFE,#9C27B0);color:#fff;padding:7px 1.5rem;font-size:12px;font-weight:700;text-align:center;flex-shrink:0">
@@ -475,7 +495,7 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
       <option>Completada</option><option>Pendiente cobro</option><option>En cuotas</option><option>Cancelada</option>
     </select>
     <input type="month" id="filter-mes-venta" onchange="renderVentas()" style="width:140px">
-    <button class="btn btn-primary" onclick="openModal('modal-venta')">+ Nueva venta</button>
+    <button class="btn btn-primary" onclick="abrirPOS()">+ Nueva venta</button>
   </div>
   <div class="cards-grid" id="ventas-cards"></div>
   <div class="card-table">
@@ -871,37 +891,109 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 
 <!-- VENTA -->
 <div class="modal-overlay" id="modal-venta">
-<div class="modal">
-  <div class="modal-head"><h3>🧾 Nueva venta</h3><span class="modal-close" onclick="closeModal('modal-venta')">✕</span></div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label>Fecha *</label><input type="date" id="venta-fecha"></div>
-      <div class="form-group"><label>N° Comprobante</label><input type="text" id="venta-comprobante"></div>
-      <div class="form-group" style="grid-column:1/-1"><label>Producto *</label>
-        <div style="display:flex;gap:6px">
-          <select id="venta-producto" onchange="onVentaProdChange()" style="flex:1"></select>
-          <button class="btn btn-sm btn-green" onclick="abrirEscaner('venta')" type="button" title="Buscar por código de barras">📷</button>
+<div class="modal" style="width:1100px;max-width:99vw">
+  <div class="modal-head">
+    <h3>🛒 Punto de Venta</h3>
+    <span style="font-size:11px;color:var(--text3)">Clic en producto para agregar al carrito</span>
+    <span class="modal-close" onclick="closeModal('modal-venta')">✕</span>
+  </div>
+  <div class="modal-body" style="padding:0">
+    <div style="display:grid;grid-template-columns:1fr 420px;height:680px;max-height:86vh">
+
+      <!-- IZQUIERDA: Productos -->
+      <div style="display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden">
+        <div style="padding:12px;border-bottom:1px solid var(--border);background:var(--bg3)">
+          <div style="display:flex;gap:8px">
+            <div style="position:relative;flex:1">
+              <input type="text" id="pos-search" placeholder="Buscar por nombre, código, marca..." oninput="posSearch()" style="padding-left:36px;width:100%">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px">🔍</span>
+            </div>
+            <button class="btn btn-sm btn-green" onclick="abrirEscaner('pos')" title="Escanear código">📷</button>
+          </div>
+        </div>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;flex-shrink:0;align-items:center">
+          <button class="btn btn-xs active" id="pos-cat-todos" onclick="posFiltrarCat('',this)">Todos</button>
+          <div id="pos-cats-btns" style="display:flex;gap:6px"></div>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start" id="pos-productos-lista"></div>
+      </div>
+
+      <!-- DERECHA: Carrito + cobro -->
+      <div style="display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border);background:var(--bg3)">
+          <select id="pos-cliente" style="width:100%;font-size:12px">
+            <option value="">👤 Sin cliente</option>
+          </select>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:8px" id="pos-carrito">
+          <div class="empty-state" style="padding:2rem"><div class="ei" style="font-size:32px">🛒</div><p style="font-size:13px">Agregá productos</p></div>
+        </div>
+
+        <!-- COBRO -->
+        <div style="border-top:1px solid var(--border);padding:12px;background:var(--bg3)">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px">
+            <span>Subtotal</span><span id="pos-subtotal">$0</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:12px;color:var(--text2);white-space:nowrap">Desc. $</span>
+            <input type="number" id="pos-descuento" value="0" min="0" step="100" oninput="posRecalcular()" style="flex:1;padding:5px 8px;font-size:12px">
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:20px;font-weight:900;color:var(--blue);margin-bottom:10px;padding:8px 12px;background:var(--blue-bg);border-radius:var(--radius)">
+            <span>TOTAL</span><span id="pos-total">$0</span>
+          </div>
+
+          <!-- MÉTODOS -->
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Método de pago</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px">
+            <button class="btn btn-sm pos-metodo active" onclick="posSelMetodo(this,'Efectivo')" data-metodo="Efectivo">💵 Efectivo</button>
+            <button class="btn btn-sm pos-metodo" onclick="posSelMetodo(this,'Transferencia')" data-metodo="Transferencia">🏦 Transfer.</button>
+            <button class="btn btn-sm pos-metodo" onclick="posSelMetodo(this,'Tarjeta débito')" data-metodo="Tarjeta débito">💳 Débito</button>
+            <button class="btn btn-sm pos-metodo" onclick="posSelMetodo(this,'Tarjeta crédito')" data-metodo="Tarjeta crédito">💳 Crédito</button>
+            <button class="btn btn-sm pos-metodo" onclick="posSelMetodo(this,'Mercado Pago')" data-metodo="Mercado Pago">📱 MP</button>
+            <button class="btn btn-sm pos-metodo" onclick="posSelMetodo(this,'Mixto')" data-metodo="Mixto">🔀 Mixto</button>
+          </div>
+
+          <!-- EFECTIVO -->
+          <div id="pos-efectivo-wrap" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text2);white-space:nowrap">Recibido $</span>
+              <input type="number" id="pos-recibido" placeholder="0" oninput="posCalcCambio()" style="flex:1;padding:6px 8px;font-size:16px;font-weight:700">
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+              <span style="font-size:13px;color:var(--text2);font-weight:600">Cambio:</span>
+              <span id="pos-cambio" style="font-size:22px;font-weight:800;color:var(--green)">$0</span>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap" id="pos-billetes"></div>
+          </div>
+
+          <!-- PAGO MIXTO -->
+          <div id="pos-mixto-wrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:8px">
+            <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Distribución del pago</div>
+            <div id="pos-mixto-filas"></div>
+            <button class="btn btn-xs btn-green" onclick="posAgregarPagoMixto()" style="margin-top:6px;width:100%;justify-content:center">+ Agregar método</button>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+                <span style="color:var(--text2)">Total asignado:</span>
+                <span id="pos-mixto-asignado" style="font-weight:700;color:var(--blue)">$0</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text2)">Falta asignar:</span>
+                <span id="pos-mixto-falta" style="font-weight:700;color:var(--red)">$0</span>
+              </div>
+            </div>
+          </div>
+
+          <select id="pos-estado" style="width:100%;font-size:12px;margin-bottom:8px">
+            <option>Completada</option>
+            <option>Pendiente cobro</option>
+            <option>En cuotas</option>
+          </select>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;font-size:16px;padding:13px;border-radius:12px" onclick="posCobrar()" id="pos-btn-cobrar">
+            💰 Cobrar
+          </button>
         </div>
       </div>
-      <div class="form-group"><label>Cliente</label><select id="venta-cliente"></select></div>
-      <div class="form-group"><label>Cantidad *</label><input type="number" id="venta-cant" value="1" min="1" oninput="calcVenta()"></div>
-      <div class="form-group"><label>Precio unit. ($)</label><input type="number" id="venta-precio" step="0.01" oninput="calcVenta()"></div>
-      <div class="form-group"><label>Descuento ($)</label><input type="number" id="venta-descuento" value="0" step="0.01" oninput="calcVenta()"></div>
-      <div class="form-group"><label>Total</label><input type="text" id="venta-total" readonly></div>
-      <div class="form-group"><label>Método de pago</label>
-        <select id="venta-pago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta débito</option><option>Tarjeta crédito</option><option>Cuotas</option><option>Mercado Pago</option></select>
-      </div>
-      <div class="form-group"><label>Estado</label>
-        <select id="venta-estado"><option>Completada</option><option>Pendiente cobro</option><option>En cuotas</option><option>Cancelada</option></select>
-      </div>
-      <div class="form-group" style="grid-column:1/-1"><label>Notas</label><textarea id="venta-notas" rows="2"></textarea></div>
     </div>
-    <div id="venta-preview" class="receipt-box" style="display:none;margin-top:12px"></div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" onclick="closeModal('modal-venta')">Cancelar</button>
-    <button class="btn" onclick="previewVenta()">👁 Vista previa</button>
-    <button class="btn btn-primary" onclick="saveVenta()">💾 Registrar</button>
   </div>
 </div>
 </div>
@@ -1520,19 +1612,8 @@ function showPage(p, el) {
 // ============================================================
 function openModal(id) {
   if (id==='modal-venta') {
-    document.getElementById('venta-fecha').value = hoy();
-    document.getElementById('venta-descuento').value = '0';
-    document.getElementById('venta-notas').value = '';
-    document.getElementById('venta-comprobante').value = genNum('V-', cache.ventas);
-    document.getElementById('venta-preview').style.display = 'none';
-    const sp = document.getElementById('venta-producto');
-    const prods = cache.productos.filter(p => parseInt(p.stock||0)>0 && p.estado!=='Descontinuado');
-    sp.innerHTML = prods.length
-      ? prods.map(p=>`<option value="${p.id}" data-precio="${p.precio_venta}">${p.nombre}${p.variante?' – '+p.variante:''} (${p.stock} ud.)</option>`).join('')
-      : '<option value="">Sin stock disponible</option>';
-    if (prods.length) { document.getElementById('venta-precio').value = prods[0].precio_venta||''; calcVenta(); }
-    document.getElementById('venta-cliente').innerHTML = '<option value="">-- Sin cliente --</option>' +
-      cache.clientes.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+    // POS is now handled by abrirPOS() directly
+    // This block kept for compatibility
   }
   if (id==='modal-producto') {
     if (!document.getElementById('prod-edit-id').value) {
@@ -3286,6 +3367,374 @@ async function activarPlanPro(negId) {
 }
 
 // ============================================================
+// POS — PUNTO DE VENTA COMPLETO
+// ============================================================
+let posCarrito = []; // [{producto, cantidad, precioUnit, subtotal}]
+let posMetodoActual = 'Efectivo';
+let posCatActual = '';
+
+function abrirPOS() {
+  posCarrito = [];
+  posMetodoActual = 'Efectivo';
+  document.getElementById('pos-descuento').value = '0';
+  document.getElementById('pos-recibido').value = '';
+  document.getElementById('pos-cambio').textContent = '$0';
+  document.getElementById('pos-search').value = '';
+  document.getElementById('pos-estado').value = 'Completada';
+
+  // Cargar cliente
+  const sc = document.getElementById('pos-cliente');
+  sc.innerHTML = '<option value="">👤 Sin cliente</option>' +
+    cache.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+
+  // Cargar categorías
+  const catsDiv = document.getElementById('pos-cats-btns');
+  catsDiv.innerHTML = cache.categorias.map(c =>
+    `<button class="btn btn-xs pos-metodo" onclick="posFiltrarCat('${c.nombre}',this)">${c.nombre}</button>`
+  ).join('');
+
+  // Método efectivo activo por defecto
+  document.querySelectorAll('.pos-metodo').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-metodo="Efectivo"]')?.classList.add('active');
+  document.getElementById('pos-efectivo-wrap').style.display = 'block';
+
+  // Billetes rápidos
+  const billetes = [500,1000,2000,5000,10000,20000];
+  document.getElementById('pos-billetes').innerHTML = billetes.map(b =>
+    `<button class="pos-billete" onclick="posBillete(${b})">${fmt(b)}</button>`
+  ).join('');
+
+  posRenderCarrito();
+  openModal('modal-venta');
+  setTimeout(() => posRenderProductos(), 80);
+}
+
+function posSearch() {
+  posRenderProductos();
+}
+
+function posFiltrarCat(cat, btn) {
+  posCatActual = cat;
+  document.querySelectorAll('#pos-cats-btns .btn, #pos-cat-todos').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  posRenderProductos();
+}
+
+function posRenderProductos() {
+  const q = (document.getElementById('pos-search').value || '').toLowerCase();
+  let prods = cache.productos.filter(p =>
+    p.estado !== 'Descontinuado' &&
+    (!posCatActual || p.categoria === posCatActual) &&
+    (!q || (p.nombre + (p.codigo||'') + (p.marca||'')).toLowerCase().includes(q))
+  ).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+  const cont = document.getElementById('pos-productos-lista');
+  if (!prods.length) { cont.innerHTML = emptyState('📦','Sin productos'); return; }
+
+  // Limitar a 50 productos para no congelar el navegador
+  const mostrar = prods.slice(0, 50);
+  const hayMas = prods.length > 50;
+
+  cont.innerHTML = mostrar.map(p => {
+    const stockInt = parseInt(p.stock||0);
+    const stockColor = stockInt === 0 ? 'var(--red)' : stockInt <= parseInt(p.stock_min||2) ? 'var(--amber)' : 'var(--green)';
+    const enCarrito = posCarrito.find(i => i.producto.id === p.id);
+    return `<div class="pos-prod-card" onclick="posAgregarProducto('${p.id}')">
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <div class="pos-prod-nombre" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nombre}${p.variante ? ' <span style="font-weight:400;color:var(--text3)">'+p.variante+'</span>' : ''}</div>
+        <div class="pos-prod-sub">${p.categoria}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:8px">
+        <div class="pos-prod-precio">${fmt(p.precio_venta)}</div>
+        <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:2px">
+          <span class="pos-prod-stock" style="background:${stockColor}22;color:${stockColor}">${stockInt} ud.</span>
+          ${enCarrito ? `<span style="background:var(--blue);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px">×${enCarrito.cantidad}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('') + (hayMas ? `<div style="text-align:center;padding:10px;font-size:12px;color:var(--text3)">Buscá para filtrar los ${prods.length} productos</div>` : '');
+}
+
+function posAgregarProducto(prodId) {
+  const prod = cache.productos.find(p => p.id === prodId);
+  if (!prod) return;
+  const stockDisp = parseInt(prod.stock || 0);
+  const existing = posCarrito.find(i => i.producto.id === prodId);
+  const cantActual = existing ? existing.cantidad : 0;
+  if (cantActual >= stockDisp) {
+    if (stockDisp === 0) { alert(`Sin stock disponible de "${prod.nombre}"`); return; }
+    alert(`Stock máximo disponible: ${stockDisp} unidades`); return;
+  }
+  if (existing) {
+    existing.cantidad++;
+    existing.subtotal = existing.cantidad * existing.precioUnit;
+  } else {
+    posCarrito.push({
+      producto: prod,
+      cantidad: 1,
+      precioUnit: parseFloat(prod.precio_venta || 0),
+      subtotal: parseFloat(prod.precio_venta || 0)
+    });
+  }
+  posRenderCarrito();
+  posRenderProductos();
+}
+
+function posCambiarCantidad(prodId, delta) {
+  const idx = posCarrito.findIndex(i => i.producto.id === prodId);
+  if (idx === -1) return;
+  const item = posCarrito[idx];
+  const nuevaCant = item.cantidad + delta;
+  if (nuevaCant <= 0) {
+    posCarrito.splice(idx, 1);
+  } else {
+    const stockDisp = parseInt(item.producto.stock || 0);
+    if (nuevaCant > stockDisp) { alert(`Stock máximo: ${stockDisp}`); return; }
+    item.cantidad = nuevaCant;
+    item.subtotal = nuevaCant * item.precioUnit;
+  }
+  posRenderCarrito();
+  posRenderProductos();
+}
+
+function posEditarPrecio(prodId) {
+  const item = posCarrito.find(i => i.producto.id === prodId);
+  if (!item) return;
+  const nuevo = prompt(`Precio unitario de "${item.producto.nombre}":`, item.precioUnit);
+  if (nuevo === null) return;
+  const n = parseFloat(nuevo);
+  if (isNaN(n) || n < 0) { alert('Precio inválido'); return; }
+  item.precioUnit = n;
+  item.subtotal = item.cantidad * n;
+  posRenderCarrito();
+}
+
+function posRenderCarrito() {
+  const cont = document.getElementById('pos-carrito');
+  if (!posCarrito.length) {
+    cont.innerHTML = '<div class="empty-state" style="padding:2rem"><div class="ei" style="font-size:32px">🛒</div><p style="font-size:13px">Agregá productos</p></div>';
+    posRecalcular(); return;
+  }
+  cont.innerHTML = posCarrito.map(item => `
+    <div class="pos-carrito-item">
+      <div style="flex:1;min-width:0">
+        <div class="pos-carrito-nombre">${item.producto.nombre}${item.producto.variante ? ' '+item.producto.variante : ''}</div>
+        <div class="pos-carrito-precio" onclick="posEditarPrecio('${item.producto.id}')" style="cursor:pointer;text-decoration:underline dotted" title="Clic para editar precio">${fmt(item.precioUnit)} c/u · ${fmt(item.subtotal)}</div>
+      </div>
+      <div class="pos-qty-wrap">
+        <button class="pos-qty-btn" onclick="posCambiarCantidad('${item.producto.id}',-1)">−</button>
+        <span class="pos-qty-num">${item.cantidad}</span>
+        <button class="pos-qty-btn" onclick="posCambiarCantidad('${item.producto.id}',1)">+</button>
+      </div>
+    </div>`).join('');
+  posRecalcular();
+}
+
+function posRecalcular() {
+  const subtotal = posCarrito.reduce((a, i) => a + i.subtotal, 0);
+  const descuento = parseFloat(document.getElementById('pos-descuento').value) || 0;
+  const total = Math.max(0, subtotal - descuento);
+  document.getElementById('pos-subtotal').textContent = fmt(subtotal);
+  document.getElementById('pos-total').textContent = fmt(total);
+  document.getElementById('pos-btn-cobrar').textContent = `💰 Cobrar ${fmt(total)}`;
+  posCalcCambio();
+}
+
+function posCalcCambio() {
+  const descuento = parseFloat(document.getElementById('pos-descuento').value) || 0;
+  const subtotal = posCarrito.reduce((a, i) => a + i.subtotal, 0);
+  const total = Math.max(0, subtotal - descuento);
+  const recibido = parseFloat(document.getElementById('pos-recibido').value) || 0;
+  const cambio = recibido - total;
+  const el = document.getElementById('pos-cambio');
+  el.textContent = cambio >= 0 ? fmt(cambio) : '-' + fmt(Math.abs(cambio));
+  el.style.color = cambio >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+function posBillete(monto) {
+  const actual = parseFloat(document.getElementById('pos-recibido').value) || 0;
+  document.getElementById('pos-recibido').value = actual + monto;
+  posCalcCambio();
+}
+
+function posSelMetodo(btn, metodo) {
+  posMetodoActual = metodo;
+  document.querySelectorAll('.pos-metodo[data-metodo]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const esEfectivo = metodo === 'Efectivo';
+  const esMixto = metodo === 'Mixto';
+  document.getElementById('pos-efectivo-wrap').style.display = esEfectivo ? 'block' : 'none';
+  document.getElementById('pos-mixto-wrap').style.display = esMixto ? 'block' : 'none';
+  if (!esEfectivo) {
+    document.getElementById('pos-recibido').value = '';
+    document.getElementById('pos-cambio').textContent = '$0';
+  }
+  if (esMixto) posIniciarMixto();
+}
+
+// ---- PAGO MIXTO ----
+let posPagosMixtos = [];
+
+function posGetTotal() {
+  const subtotal = posCarrito.reduce((a,i) => a+i.subtotal, 0);
+  const desc = parseFloat(document.getElementById('pos-descuento')?.value)||0;
+  return Math.max(0, subtotal - desc);
+}
+
+function posIniciarMixto() {
+  const total = posGetTotal();
+  posPagosMixtos = [
+    { metodo: 'Efectivo', monto: 0 },
+    { metodo: 'Transferencia', monto: total }
+  ];
+  posRenderMixto();
+}
+
+function posAgregarPagoMixto() {
+  posPagosMixtos.push({ metodo: 'Efectivo', monto: 0 });
+  posRenderMixto();
+}
+
+function posEliminarPagoMixto(idx) {
+  posPagosMixtos.splice(idx, 1);
+  posRenderMixto();
+}
+
+function posRenderMixto() {
+  const total = posGetTotal();
+  const metodos = ['Efectivo','Transferencia','Tarjeta débito','Tarjeta crédito','Mercado Pago','Cuotas'];
+  document.getElementById('pos-mixto-filas').innerHTML = posPagosMixtos.map((p,i) => `
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+      <select onchange="posPagosMixtos[${i}].metodo=this.value" style="flex:1;font-size:12px;padding:5px">
+        ${metodos.map(m => `<option ${m===p.metodo?'selected':''}>${m}</option>`).join('')}
+      </select>
+      <input type="number" value="${p.monto}" min="0" step="100"
+        oninput="posPagosMixtos[${i}].monto=parseFloat(this.value)||0;posActualizarMixto()"
+        style="width:110px;padding:5px 8px;font-size:13px;font-weight:700">
+      ${posPagosMixtos.length > 1 ? `<button onclick="posEliminarPagoMixto(${i})" style="background:var(--red-bg);border:1px solid var(--red);border-radius:6px;cursor:pointer;padding:4px 7px;color:var(--red-text);font-size:12px">✕</button>` : ''}
+    </div>`).join('');
+  posActualizarMixto();
+}
+
+function posActualizarMixto() {
+  const total = posGetTotal();
+  const asignado = posPagosMixtos.reduce((a,p) => a+(parseFloat(p.monto)||0), 0);
+  const falta = total - asignado;
+  document.getElementById('pos-mixto-asignado').textContent = fmt(asignado);
+  document.getElementById('pos-mixto-falta').style.color = falta <= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('pos-mixto-falta').textContent = falta <= 0 ? '✅ Cubierto' : fmt(falta);
+}
+
+async function posCobrar() {
+  if (!posCarrito.length) { alert('Agregá al menos un producto'); return; }
+
+  const descuento = parseFloat(document.getElementById('pos-descuento').value) || 0;
+  const subtotal = posCarrito.reduce((a, i) => a + i.subtotal, 0);
+  const total = Math.max(0, subtotal - descuento);
+  const estado = document.getElementById('pos-estado').value;
+
+  // Validaciones por método
+  if (posMetodoActual === 'Efectivo') {
+    const recibido = parseFloat(document.getElementById('pos-recibido').value) || 0;
+    if (estado === 'Completada' && recibido < total) {
+      if (!confirm(`El monto recibido (${fmt(recibido)}) es menor al total (${fmt(total)}). ¿Registrar igual?`)) return;
+    }
+  } else if (posMetodoActual === 'Mixto') {
+    const asignado = posPagosMixtos.reduce((a,p) => a+(parseFloat(p.monto)||0), 0);
+    if (asignado < total) {
+      if (!confirm(`Total asignado (${fmt(asignado)}) es menor al total (${fmt(total)}). ¿Registrar igual?`)) return;
+    }
+  }
+
+  const cliId = document.getElementById('pos-cliente').value;
+  const cli = cache.clientes.find(c => c.id === cliId);
+  const fecha = hoy();
+
+  showLoading('Registrando venta...');
+  try {
+    // Registrar una venta por cada producto del carrito
+    for (const item of posCarrito) {
+      const venta = {
+        negocio_id: negocioId,
+        fecha,
+        comprobante: genNum('V-', cache.ventas),
+        producto_id: item.producto.id,
+        producto_nombre: item.producto.nombre,
+        cliente_id: cliId || null,
+        cliente_nombre: cli ? cli.nombre : 'Sin cliente',
+        cantidad: item.cantidad,
+        precio_unit: item.precioUnit,
+        descuento: posCarrito.length === 1 ? descuento : 0,
+        total: posCarrito.length === 1 ? total : item.subtotal,
+        metodo_pago: posMetodoActual === 'Mixto' ? posPagosMixtos.map(p=>p.metodo).join('+') : posMetodoActual,
+        estado,
+        notas: posCarrito.length > 1 ? `Venta múltiple (${posCarrito.length} productos)` : ''
+      };
+      await api('POST', 'ventas', venta);
+
+      // Descontar stock
+      if (estado === 'Completada') {
+        const nuevoStock = parseInt(item.producto.stock || 0) - item.cantidad;
+        await api('PATCH', `productos?id=eq.${item.producto.id}`, {
+          stock: Math.max(0, nuevoStock),
+          estado: nuevoStock <= 0 ? 'Agotado' : item.producto.estado
+        });
+      }
+    }
+
+    // Movimiento de caja
+    if (estado === 'Completada') {
+      if (posMetodoActual === 'Mixto' && posPagosMixtos.length > 0) {
+        // Registrar un movimiento por cada método de pago mixto
+        for (const pago of posPagosMixtos) {
+          if (pago.monto > 0) {
+            await api('POST', 'movimientos', {
+              negocio_id: negocioId, fecha, tipo: 'ingreso',
+              descripcion: `Venta POS (${pago.metodo}) - ${cli?.nombre||'Sin cliente'}`,
+              monto: pago.monto, metodo: pago.metodo
+            });
+          }
+        }
+      } else {
+        await api('POST', 'movimientos', {
+          negocio_id: negocioId, fecha, tipo: 'ingreso',
+          descripcion: `Venta POS (${posCarrito.length} producto${posCarrito.length>1?'s':''}) - ${cli?.nombre||'Sin cliente'}`,
+          monto: total, metodo: posMetodoActual
+        });
+      }
+      // Actualizar cliente
+      if (cli) {
+        await api('PATCH', `clientes?id=eq.${cliId}`, {
+          compras: (cli.compras||0) + 1,
+          total_gastado: (cli.total_gastado||0) + total,
+          ultima_compra: fecha
+        });
+      }
+    }
+
+    await recargarTodo();
+    closeModal('modal-venta');
+
+    // Mostrar ticket de cambio si es efectivo
+    if (posMetodoActual === 'Efectivo') {
+      const recibido = parseFloat(document.getElementById('pos-recibido')?.value) || 0;
+      const cambio = recibido - total;
+      if (cambio > 0) alert(`✅ Venta registrada\n\nTotal: ${fmt(total)}\nRecibido: ${fmt(recibido)}\nCAMBIO: ${fmt(cambio)}`);
+      else alert(`✅ Venta registrada\nTotal: ${fmt(total)}`);
+    } else if (posMetodoActual === 'Mixto') {
+      const resumen = posPagosMixtos.filter(p=>p.monto>0).map(p=>`${p.metodo}: ${fmt(p.monto)}`).join('\n');
+      alert(`✅ Venta registrada\n\nTotal: ${fmt(total)}\n\nPagos:\n${resumen}`);
+    } else {
+      alert(`✅ Venta registrada\nTotal: ${fmt(total)}\nMétodo: ${posMetodoActual}`);
+    }
+
+    renderVentas();
+    renderDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
+  hideLoading();
+}
+
+// ============================================================
 // ESCANER DE CODIGO DE BARRAS
 // ============================================================
 let escanerStream = null;
@@ -3488,6 +3937,14 @@ function usarProducto(prod) {
     document.getElementById('prod-nombre').value = prod.nombre || '';
     cerrarEscaner();
 
+  } else if (escanerContexto === 'pos') {
+    // Contexto POS: agregar al carrito
+    cerrarEscaner();
+    posAgregarProducto(prod.id);
+    posRenderProductos();
+  } else if (escanerContexto === 'pos') {
+    cerrarEscaner();
+    posAgregarProducto(prod.id);
   } else {
     // Contexto stock: abrir el producto para editar
     cerrarEscaner();
