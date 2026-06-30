@@ -225,6 +225,14 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 .pos-metodo.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .pos-billete{padding:4px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);cursor:pointer;font-size:12px;font-weight:700;color:var(--text);transition:all .15s}
 .pos-billete:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.pos-grid-layout{display:grid;grid-template-columns:1fr 420px}
+@media(max-width:768px){
+  .pos-grid-layout{grid-template-columns:1fr !important;height:auto !important;max-height:none !important;overflow-y:auto}
+  #modal-venta .modal{width:100vw !important;max-width:100vw !important;height:100vh !important;max-height:100vh !important;border-radius:0;margin:0}
+  #modal-venta .modal-body{overflow-y:auto}
+  .pos-grid-layout > div:first-child{border-right:none !important;border-bottom:1px solid var(--border);max-height:45vh}
+  #pos-productos-lista{grid-template-columns:1fr !important;max-height:none}
+}
 
 /* INSIGHTS IA */
 .insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
@@ -251,12 +259,18 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 .wizard-box p{color:var(--text2);font-size:14px;margin-bottom:1.5rem}
 
 @media(max-width:768px){
-  .sidebar{position:fixed;left:-240px;top:0;bottom:0;z-index:200;transition:left .25s}
-  .sidebar.open{left:0}
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;z-index:9500;transition:left .25s;box-shadow:none}
+  .sidebar.open{left:0;box-shadow:8px 0 30px rgba(0,0,0,.3)}
   .two-col{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
   .cards-grid{grid-template-columns:repeat(2,1fr)}
+  .mobile-menu-btn{display:flex !important}
+  .sidebar-overlay.open{display:block}
 }
+.mobile-menu-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border:none;background:none;font-size:22px;cursor:pointer;color:var(--text);border-radius:8px;flex-shrink:0}
+.mobile-menu-btn:hover{background:var(--bg3)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9400}
+.sidebar-overlay.open{display:block}
 </style>
 </head>
 <body>
@@ -373,6 +387,7 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 <div class="app" id="app" style="display:none">
 
 <!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">
@@ -417,6 +432,7 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 <!-- MAIN -->
 <div class="main-wrap">
   <div class="topbar">
+    <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="db-badge"><span class="dot"></span>Conectado</div>
     <div class="topbar-date" id="fecha-hoy"></div>
@@ -911,8 +927,8 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
       <div class="form-group"><label>Variante</label><input type="text" id="prod-variante"></div>
       <div class="form-group"><label>Stock actual *</label><input type="number" id="prod-stock" min="0"></div>
       <div class="form-group"><label>Stock mínimo</label><input type="number" id="prod-stock-min" min="0"></div>
-      <div class="form-group"><label>P. Compra ($)</label><input type="number" id="prod-precio-c" step="0.01" oninput="calcMargen()"></div>
-      <div class="form-group"><label>P. Venta ($)</label><input type="number" id="prod-precio-v" step="0.01" oninput="calcMargen()"></div>
+      <div class="form-group"><label>P. Compra ($)</label><input type="number" id="prod-precio-c" step="0.01" min="0" oninput="calcMargen()"></div>
+      <div class="form-group"><label>P. Venta ($)</label><input type="number" id="prod-precio-v" step="0.01" min="0" oninput="calcMargen()"></div>
       <div class="form-group"><label>Margen</label><input type="text" id="prod-margen" readonly></div>
       <div class="form-group"><label>Estado</label>
         <select id="prod-estado"><option>Disponible</option><option>Reservado</option><option>Agotado</option><option>Descontinuado</option></select>
@@ -936,7 +952,7 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
     <span class="modal-close" onclick="closeModal('modal-venta')">✕</span>
   </div>
   <div class="modal-body" style="padding:0">
-    <div style="display:grid;grid-template-columns:1fr 420px;height:680px;max-height:86vh">
+    <div class="pos-grid-layout" style="height:680px;max-height:86vh">
 
       <!-- IZQUIERDA: Productos -->
       <div style="display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden">
@@ -1474,7 +1490,10 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 const SUPABASE_URL = 'https://zrqttjsbprtzkeksdtev.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JPh40u7juzRd0EzWKLQElQ_C4Nd8EVK';
 
-const api = async (method, table, body=null, query='') => {
+let currentRefreshToken = null;
+let sessionExpiraEn = null; // timestamp ms
+
+const api = async (method, table, body=null, query='', _retried=false) => {
   const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
   const res = await fetch(url, {
     method,
@@ -1486,13 +1505,41 @@ const api = async (method, table, body=null, query='') => {
     },
     body: body ? JSON.stringify(body) : undefined
   });
+  if (res.status === 401 && !_retried && currentRefreshToken) {
+    // Token expirado: intentar refrescar y reintentar una vez
+    const renovado = await intentarRenovarSesion();
+    if (renovado) return api(method, table, body, query, true);
+  }
   if (!res.ok) {
     const err = await res.json().catch(()=>({}));
+    if (res.status === 401) {
+      // Sesión vencida sin poder renovar: forzar logout
+      alert('⏰ Tu sesión expiró. Iniciá sesión de nuevo para continuar.');
+      doLogout();
+      throw new Error('Sesión expirada');
+    }
     throw new Error(err.message || err.error_description || res.statusText);
   }
   if (res.status === 204) return null;
   return res.json();
 };
+
+async function intentarRenovarSesion() {
+  if (!currentRefreshToken) return false;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: {'apikey': SUPABASE_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({ refresh_token: currentRefreshToken })
+    });
+    if (!res.ok) return false;
+    const d = await res.json();
+    currentToken = d.access_token;
+    currentRefreshToken = d.refresh_token;
+    sessionExpiraEn = Date.now() + ((d.expires_in||3600) * 1000);
+    return true;
+  } catch(e) { return false; }
+}
 
 const authApi = async (endpoint, body) => {
   const res = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
@@ -1535,6 +1582,11 @@ function badgeEstado(e) {
     'En cuotas':'blue',Rechazado:'red',Descontinuado:'gray'};
   return `<span class="badge badge-${m[e]||'gray'}">${e}</span>`;
 }
+// Escapa comillas simples para usar texto libre dentro de onclick="..."
+function escJs(str) {
+  return String(str||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+
 function chartBars(items, colorVar, fmtFn) {
   if (!items.length) return `<div class="empty-state" style="padding:1.5rem"><div class="ei">📊</div><p>Sin datos</p></div>`;
   const max = items[0][1] || 1;
@@ -1566,7 +1618,10 @@ async function doLogin() {
   try {
     const d = await authApi('token?grant_type=password', {email, password: pass});
     currentToken = d.access_token;
+    currentRefreshToken = d.refresh_token;
+    sessionExpiraEn = Date.now() + ((d.expires_in||3600) * 1000);
     currentUser = d.user;
+    iniciarRenovacionAutomatica();
     await loadApp(false);
   } catch(e) {
     hideLoading();
@@ -1588,7 +1643,10 @@ async function doRegistro() {
   try {
     const d = await authApi('signup', {email, password: pass, data:{negocio_nombre: negocio}});
     currentToken = d.access_token;
+    currentRefreshToken = d.refresh_token;
+    sessionExpiraEn = Date.now() + ((d.expires_in||3600) * 1000);
     currentUser = d.user;
+    iniciarRenovacionAutomatica();
     hideLoading();
     // create negocio
     showLoading('Configurando tu negocio...');
@@ -1600,10 +1658,25 @@ async function doRegistro() {
   }
 }
 
+let renovacionTimer = null;
+
+function iniciarRenovacionAutomatica() {
+  if (renovacionTimer) clearInterval(renovacionTimer);
+  // Revisa cada 5 minutos si falta poco para que expire el token y lo renueva antes
+  renovacionTimer = setInterval(async () => {
+    if (!sessionExpiraEn || !currentRefreshToken) return;
+    const faltaMs = sessionExpiraEn - Date.now();
+    if (faltaMs < 10 * 60 * 1000) { // menos de 10 min para expirar
+      await intentarRenovarSesion();
+    }
+  }, 5 * 60 * 1000);
+}
+
 async function doLogout() {
   showLoading('Cerrando sesión...');
-  currentUser = null; currentToken = null; negocioId = null;
-  cache = {productos:[],clientes:[],proveedores:[],categorias:[],ventas:[],gastos:[],presupuestos:[],movimientos:[]};
+  if (renovacionTimer) { clearInterval(renovacionTimer); renovacionTimer = null; }
+  currentUser = null; currentToken = null; currentRefreshToken = null; sessionExpiraEn = null; negocioId = null;
+  cache = {productos:[],clientes:[],proveedores:[],categorias:[],ventas:[],gastos:[],presupuestos:[],movimientos:[],empleados:[],cc:[],cuotas:[],cuotasPagos:[]};
   document.getElementById('app').style.display='none';
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('login-email').value='';
@@ -1707,6 +1780,11 @@ function closeWizard() { document.getElementById('wizard').style.display='none';
 // ============================================================
 // NAVIGATION
 // ============================================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+
 function showPage(p, el) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
@@ -1716,6 +1794,9 @@ function showPage(p, el) {
   else document.querySelectorAll('.nav-item').forEach(ni => {
     if (ni.getAttribute('onclick')?.includes("'"+p+"'")) ni.classList.add('active');
   });
+  // Cerrar sidebar al navegar en mobile
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('open');
   const titles = {dashboard:'Dashboard',stock:'Productos / Stock',categorias:'Categorías',ventas:'Ventas',
     presupuestos:'Presupuestos',clientes:'Clientes',proveedores:'Proveedores',
     gastos:'Gastos',caja:'Caja / Movimientos',contabilidad:'Contabilidad',
@@ -1829,6 +1910,9 @@ async function saveProducto() {
   const eid = document.getElementById('prod-edit-id').value;
   const nom = document.getElementById('prod-nombre').value.trim();
   if (!nom) { alert('Ingresá el nombre'); return; }
+  const precioCompra = parseFloat(document.getElementById('prod-precio-c').value)||0;
+  const precioVenta = parseFloat(document.getElementById('prod-precio-v').value)||0;
+  if (precioCompra < 0 || precioVenta < 0) { alert('Los precios no pueden ser negativos'); return; }
   const obj = {
     negocio_id: negocioId, nombre: nom,
     categoria: document.getElementById('prod-cat').value,
@@ -1873,8 +1957,11 @@ async function editProducto(id) {
 async function delProducto(id) {
   if(!confirm('¿Eliminar este producto?')) return;
   showLoading('Eliminando...');
-  await api('DELETE', `productos?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderStock();
+  try {
+    await api('DELETE', `productos?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderStock();
 }
 async function ajustarStock(id) {
   const p = cache.productos.find(x=>x.id===id); if(!p) return;
@@ -1883,8 +1970,11 @@ async function ajustarStock(id) {
   const n = parseInt(v);
   if (isNaN(n)||n<0) { alert('Valor inválido'); return; }
   showLoading('Actualizando stock...');
-  await api('PATCH', `productos?id=eq.${id}`, {stock: n, estado: n===0?'Agotado':p.estado==='Agotado'?'Disponible':p.estado});
-  await recargarTodo(); hideLoading(); renderStock();
+  try {
+    await api('PATCH', `productos?id=eq.${id}`, {stock: n, estado: n===0?'Agotado':p.estado==='Agotado'?'Disponible':p.estado});
+    await recargarTodo();
+  } catch(e) { alert('Error: ' + e.message); }
+  hideLoading(); renderStock();
 }
 
 // ============================================================
@@ -1932,8 +2022,11 @@ async function saveVenta() {
 async function delVenta(id) {
   if(!confirm('¿Eliminar esta venta?')) return;
   showLoading('Eliminando...');
-  await api('DELETE', `ventas?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderVentas();
+  try {
+    await api('DELETE', `ventas?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderVentas();
 }
 
 // ============================================================
@@ -1981,8 +2074,12 @@ async function editCliente(id) {
 }
 async function delCliente(id) {
   if(!confirm('¿Eliminar este cliente?')) return;
-  showLoading(); await api('DELETE', `clientes?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderClientes();
+  showLoading('Eliminando...');
+  try {
+    await api('DELETE', `clientes?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderClientes();
 }
 
 // ============================================================
@@ -2027,9 +2124,13 @@ async function editProveedor(id) {
   openModal('modal-proveedor');
 }
 async function delProveedor(id) {
-  if(!confirm('¿Eliminar?')) return;
-  showLoading(); await api('DELETE', `proveedores?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderProveedores();
+  if(!confirm('¿Eliminar este proveedor?')) return;
+  showLoading('Eliminando...');
+  try {
+    await api('DELETE', `proveedores?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderProveedores();
 }
 
 // ============================================================
@@ -2074,9 +2175,13 @@ async function editGasto(id) {
   openModal('modal-gasto');
 }
 async function delGasto(id) {
-  if(!confirm('¿Eliminar?')) return;
-  showLoading(); await api('DELETE', `gastos?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderGastos();
+  if(!confirm('¿Eliminar este gasto?')) return;
+  showLoading('Eliminando...');
+  try {
+    await api('DELETE', `gastos?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderGastos();
 }
 
 // ============================================================
@@ -2087,8 +2192,12 @@ async function saveMovimiento() {
   const monto = parseFloat(document.getElementById('mov-monto').value)||0;
   if (!desc||!monto) { alert('Completá todos los campos'); return; }
   showLoading('Guardando...');
-  await api('POST', 'movimientos', {negocio_id:negocioId, fecha:document.getElementById('mov-fecha').value, tipo:document.getElementById('mov-tipo').value, descripcion:desc, monto, metodo:document.getElementById('mov-metodo').value});
-  await recargarTodo(); hideLoading(); closeModal('modal-movimiento'); renderCaja();
+  try {
+    await api('POST', 'movimientos', {negocio_id:negocioId, fecha:document.getElementById('mov-fecha').value, tipo:document.getElementById('mov-tipo').value, descripcion:desc, monto, metodo:document.getElementById('mov-metodo').value});
+    await recargarTodo();
+    closeModal('modal-movimiento'); renderCaja();
+  } catch(e) { alert('Error: ' + e.message); }
+  hideLoading();
 }
 
 // ============================================================
@@ -2136,9 +2245,13 @@ async function editPresupuesto(id) {
   calcPresupuesto();
 }
 async function delPresupuesto(id) {
-  if(!confirm('¿Eliminar?')) return;
-  showLoading(); await api('DELETE', `presupuestos?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderPresupuestos();
+  if(!confirm('¿Eliminar este presupuesto?')) return;
+  showLoading('Eliminando...');
+  try {
+    await api('DELETE', `presupuestos?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderPresupuestos();
 }
 
 // ============================================================
@@ -2148,13 +2261,20 @@ async function openAddCat() {
   const n = prompt('Nombre de la nueva categoría:');
   if (!n) return;
   showLoading('Guardando...');
-  await api('POST', 'categorias', {negocio_id:negocioId, nombre:n.trim()});
-  await recargarTodo(); hideLoading(); renderCategorias();
+  try {
+    await api('POST', 'categorias', {negocio_id:negocioId, nombre:n.trim()});
+    await recargarTodo();
+  } catch(e) { alert('Error: ' + e.message); }
+  hideLoading(); renderCategorias();
 }
 async function delCategoria(id) {
   if(!confirm('¿Eliminar esta categoría?')) return;
-  showLoading(); await api('DELETE', `categorias?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderCategorias();
+  showLoading('Eliminando...');
+  try {
+    await api('DELETE', `categorias?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderCategorias();
 }
 
 // ============================================================
@@ -2170,10 +2290,13 @@ async function saveConfig() {
     moneda: document.getElementById('cfg-moneda').value
   };
   showLoading('Guardando...');
-  await api('PATCH', `negocios?id=eq.${negocioId}`, obj);
-  negocioData = {...negocioData,...obj};
-  document.getElementById('negocio-nombre-sb').textContent = obj.nombre;
-  hideLoading(); alert('✅ Configuración guardada');
+  try {
+    await api('PATCH', `negocios?id=eq.${negocioId}`, obj);
+    negocioData = {...negocioData,...obj};
+    document.getElementById('negocio-nombre-sb').textContent = obj.nombre;
+    alert('✅ Configuración guardada');
+  } catch(e) { alert('Error al guardar: ' + e.message); }
+  hideLoading();
 }
 function renderConfig() {
   document.getElementById('cfg-nombre').value = negocioData.nombre||'';
@@ -3760,6 +3883,27 @@ async function posCobrar() {
   const total = Math.max(0, subtotal - descuento);
   const estado = document.getElementById('pos-estado').value;
 
+  // Revalidar stock actual contra Supabase (por si cambió desde otro dispositivo)
+  if (estado === 'Completada') {
+    showLoading('Verificando stock...');
+    try {
+      const idsCarrito = posCarrito.map(i => i.producto.id);
+      const stockActual = await api('GET', 'productos', null, `?id=in.(${idsCarrito.join(',')})&select=id,nombre,stock`);
+      hideLoading();
+      const sinStock = [];
+      for (const item of posCarrito) {
+        const actual = stockActual.find(p => p.id === item.producto.id);
+        if (actual && parseInt(actual.stock) < item.cantidad) {
+          sinStock.push(`${item.producto.nombre} (disponible: ${actual.stock}, pedido: ${item.cantidad})`);
+        }
+      }
+      if (sinStock.length) {
+        alert('⚠️ Stock insuficiente para:\n\n' + sinStock.join('\n') + '\n\nAjustá las cantidades antes de cobrar.');
+        return;
+      }
+    } catch(e) { hideLoading(); /* si falla la verificación, continuar igual */ }
+  }
+
   // Validaciones por método
   if (posMetodoActual === 'Efectivo') {
     const recibido = parseFloat(document.getElementById('pos-recibido').value) || 0;
@@ -4298,8 +4442,12 @@ async function editEmpleado(id) {
 
 async function delEmpleado(id) {
   if(!confirm('¿Eliminar este empleado?')) return;
-  showLoading(); await api('DELETE',`empleados?id=eq.${id}`).catch(()=>{});
-  await recargarTodo(); hideLoading(); renderEmpleados();
+  showLoading('Eliminando...');
+  try {
+    await api('DELETE',`empleados?id=eq.${id}`);
+    await recargarTodo();
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
+  hideLoading(); renderEmpleados();
 }
 
 function renderEmpleados() {
@@ -4358,7 +4506,7 @@ function renderCCClientes() {
       </td>
       <td>${badgeEstado(c.estado)}</td>
       <td><div class="actions">
-        <button class="action-btn edit" onclick="event.stopPropagation();abrirMovCCEntidad('cliente','${c.id}','${c.nombre}')" title="Nuevo movimiento">+ Mov.</button>
+        <button class="action-btn edit" onclick="event.stopPropagation();abrirMovCCEntidad('cliente','${c.id}','${escJs(c.nombre)}')" title="Nuevo movimiento">+ Mov.</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -4388,7 +4536,7 @@ function renderCCProveedores() {
       </td>
       <td>${badgeEstado(p.estado)}</td>
       <td><div class="actions">
-        <button class="action-btn edit" onclick="event.stopPropagation();abrirMovCCEntidad('proveedor','${p.id}','${p.empresa}')" title="Nuevo movimiento">+ Mov.</button>
+        <button class="action-btn edit" onclick="event.stopPropagation();abrirMovCCEntidad('proveedor','${p.id}','${escJs(p.empresa)}')" title="Nuevo movimiento">+ Mov.</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -4540,20 +4688,24 @@ async function saveMovCC() {
 async function delMovCC(id, tipo, entidadId) {
   if(!confirm('¿Eliminar este movimiento? El saldo se recalculará.')) return;
   showLoading('Eliminando...');
-  await api('DELETE',`cuentas_corrientes?id=eq.${id}`).catch(()=>{});
-  // Recalcular saldo desde los movimientos restantes
-  await recargarTodo();
-  const movs = (cache.cc||[]).filter(m=>m.entidad_id===entidadId);
-  const nuevoSaldo = movs.reduce((a,m)=>m.tipo==='cargo'?a+m.monto:Math.max(0,a-m.monto),0);
-  if (tipo==='cliente') await api('PATCH',`clientes?id=eq.${entidadId}`,{deuda:nuevoSaldo});
-  else if (tipo==='proveedor') await api('PATCH',`proveedores?id=eq.${entidadId}`,{deuda:nuevoSaldo});
-  else await api('PATCH',`empleados?id=eq.${entidadId}`,{saldo:nuevoSaldo});
-  await recargarTodo();
+  try {
+    await api('DELETE',`cuentas_corrientes?id=eq.${id}`);
+    // Recalcular saldo desde los movimientos restantes, en orden cronológico
+    await recargarTodo();
+    const movs = (cache.cc||[]).filter(m=>m.entidad_id===entidadId).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+    let saldo = 0;
+    movs.forEach(m => { saldo += m.tipo==='cargo' ? m.monto : -m.monto; });
+    saldo = Math.max(0, saldo);
+    if (tipo==='cliente') await api('PATCH',`clientes?id=eq.${entidadId}`,{deuda:saldo});
+    else if (tipo==='proveedor') await api('PATCH',`proveedores?id=eq.${entidadId}`,{deuda:saldo});
+    else await api('PATCH',`empleados?id=eq.${entidadId}`,{saldo:saldo});
+    await recargarTodo();
+    verCCEntidad(tipo, entidadId);
+    if(tipo==='cliente') renderCCClientes();
+    else if(tipo==='proveedor') renderCCProveedores();
+    else renderEmpleados();
+  } catch(e) { alert('Error: ' + e.message); }
   hideLoading();
-  verCCEntidad(tipo, entidadId);
-  if(tipo==='cliente') renderCCClientes();
-  else if(tipo==='proveedor') renderCCProveedores();
-  else renderEmpleados();
 }
 
 // ============================================================
@@ -4797,7 +4949,7 @@ function verDetalleCuota(planId) {
               : '<span class="badge badge-amber">⏳ Pendiente</span>'
           }</td>
           <td>${p.estado!=='Pagado'
-            ? `<button class="btn btn-xs btn-green" onclick="abrirPagarCuota('${p.id}','${planId}',${p.monto},'${plan.cliente_nombre}',${p.numero_cuota},${plan.cantidad_cuotas})">💰 Pagar</button>`
+            ? `<button class="btn btn-xs btn-green" onclick="abrirPagarCuota('${p.id}','${planId}',${p.monto},'${escJs(plan.cliente_nombre)}',${p.numero_cuota},${plan.cantidad_cuotas})">💰 Pagar</button>`
             : ''
           }</td>
         </tr>`;
