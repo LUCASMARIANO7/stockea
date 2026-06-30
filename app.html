@@ -400,6 +400,7 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
     <div class="nav-item" onclick="showPage('cc-clientes',this)"><span class="nav-icon">👥</span> Clientes CC</div>
     <div class="nav-item" onclick="showPage('cc-proveedores',this)"><span class="nav-icon">🚚</span> Proveedores CC</div>
     <div class="nav-item" onclick="showPage('cc-empleados',this)"><span class="nav-icon">👷</span> Empleados</div>
+    <div class="nav-item" onclick="showPage('cuotas',this)"><span class="nav-icon">📅</span> Cuotas</div>
     <div class="nav-section">Configuración</div>
     <div class="nav-item" onclick="showPage('admin',this)" id="nav-admin" style="display:none"><span class="nav-icon">👑</span> Panel Admin</div>
     <div class="nav-item" onclick="showPage('config',this)"><span class="nav-icon">⚙️</span> Configuración</div>
@@ -780,6 +781,43 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
   </div>
 </div>
 
+<!-- ========== CUOTAS ========== -->
+<div class="page" id="page-cuotas">
+  <div class="toolbar">
+    <div class="search-wrap"><input type="text" id="search-cuotas" placeholder="Buscar por cliente o producto..." oninput="renderCuotas()"></div>
+    <select id="filter-estado-cuota" onchange="renderCuotas()" style="width:150px">
+      <option value="">Todos los estados</option>
+      <option>Activo</option><option>Completado</option><option>Vencido</option>
+    </select>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" onclick="openModal('modal-nueva-cuota')">+ Nueva venta en cuotas</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="cards-grid" id="cuotas-kpis"></div>
+
+  <!-- Alertas de cuotas vencidas -->
+  <div id="cuotas-alertas"></div>
+
+  <div class="two-col">
+    <!-- Tabla de planes de cuotas -->
+    <div class="card-table">
+      <table>
+        <thead><tr>
+          <th>Cliente</th><th>Producto</th><th>Total</th>
+          <th>Cuotas</th><th>Progreso</th><th>Estado</th><th></th>
+        </tr></thead>
+        <tbody id="tabla-cuotas"></tbody>
+      </table>
+    </div>
+
+    <!-- Detalle del plan seleccionado -->
+    <div class="card" id="cuota-detalle">
+      <div class="empty-state"><div class="ei">📅</div><p>Seleccioná un plan para ver el detalle</p></div>
+    </div>
+  </div>
+</div>
+
 <!-- ========== ADMIN ========== -->
 <div class="page" id="page-admin">
   <div class="alert alert-warn" style="margin-bottom:1rem">
@@ -1138,6 +1176,89 @@ input[readonly]{background:var(--bg3);color:var(--text2)}
 </div>
 </div>
 
+<!-- MODAL NUEVA CUOTA -->
+<div class="modal-overlay" id="modal-nueva-cuota">
+<div class="modal" style="width:560px">
+  <div class="modal-head">
+    <h3>📅 Nueva venta en cuotas</h3>
+    <span class="modal-close" onclick="closeModal('modal-nueva-cuota')">✕</span>
+  </div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label>Cliente *</label>
+        <select id="cuota-cliente"></select>
+      </div>
+      <div class="form-group"><label>Producto / Descripción *</label>
+        <input type="text" id="cuota-producto" placeholder="Nombre del producto o descripción">
+      </div>
+      <div class="form-group"><label>Fecha inicio *</label>
+        <input type="date" id="cuota-fecha">
+      </div>
+      <div class="form-group"><label>Total de la venta ($) *</label>
+        <input type="number" id="cuota-total" step="0.01" placeholder="0.00" oninput="calcCuotas()">
+      </div>
+      <div class="form-group"><label>Cantidad de cuotas *</label>
+        <input type="number" id="cuota-cantidad" value="3" min="1" max="60" oninput="calcCuotas()">
+      </div>
+      <div class="form-group"><label>Interés total (%)</label>
+        <input type="number" id="cuota-interes" value="0" min="0" step="0.5" oninput="calcCuotas()">
+      </div>
+      <div class="form-group"><label>Monto por cuota</label>
+        <input type="text" id="cuota-monto-preview" readonly style="font-size:18px;font-weight:800;color:var(--blue)">
+      </div>
+      <div class="form-group"><label>Total con interés</label>
+        <input type="text" id="cuota-total-preview" readonly>
+      </div>
+      <div class="form-group" style="grid-column:1/-1"><label>Notas</label>
+        <textarea id="cuota-notas" rows="2" placeholder="Condiciones, fechas especiales..."></textarea>
+      </div>
+    </div>
+    <!-- Preview de cuotas -->
+    <div id="cuota-preview-tabla" style="margin-top:12px"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-nueva-cuota')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveCuota()">💾 Crear plan de cuotas</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL PAGAR CUOTA -->
+<div class="modal-overlay" id="modal-pagar-cuota">
+<div class="modal" style="width:420px">
+  <div class="modal-head">
+    <h3>💰 Registrar pago de cuota</h3>
+    <span class="modal-close" onclick="closeModal('modal-pagar-cuota')">✕</span>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="pago-cuota-id">
+    <input type="hidden" id="pago-cuotaplan-id">
+    <div id="pago-cuota-info" style="background:var(--blue-bg);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:13px"></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Fecha de pago *</label>
+        <input type="date" id="pago-cuota-fecha">
+      </div>
+      <div class="form-group"><label>Monto pagado ($) *</label>
+        <input type="number" id="pago-cuota-monto" step="0.01">
+      </div>
+      <div class="form-group"><label>Método de pago</label>
+        <select id="pago-cuota-metodo">
+          <option>Efectivo</option><option>Transferencia</option>
+          <option>Tarjeta débito</option><option>Mercado Pago</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notas</label>
+        <input type="text" id="pago-cuota-notas" placeholder="Observaciones...">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" onclick="closeModal('modal-pagar-cuota')">Cancelar</button>
+    <button class="btn btn-green" onclick="registrarPagoCuota()">✅ Registrar pago</button>
+  </div>
+</div>
+</div>
+
 <!-- MODAL EMPLEADO -->
 <div class="modal-overlay" id="modal-empleado">
 <div class="modal">
@@ -1391,7 +1512,7 @@ let currentUser = null;
 let currentToken = null;
 let negocioId = null;
 let negocioData = {};
-let cache = { productos:[], clientes:[], proveedores:[], categorias:[], ventas:[], gastos:[], presupuestos:[], movimientos:[], empleados:[], cc:[] };
+let cache = { productos:[], clientes:[], proveedores:[], categorias:[], ventas:[], gastos:[], presupuestos:[], movimientos:[], empleados:[], cc:[], cuotas:[], cuotasPagos:[] };
 let movsFilter = 'todos';
 
 // ============================================================
@@ -1553,7 +1674,7 @@ async function loadApp(isNew, negocioNombre='') {
 
 async function recargarTodo() {
   const nid = `?negocio_id=eq.${negocioId}&order=created_at.desc`;
-  const [cats, prods, clis, provs, ventas, gastos, presus, movs, emps, cc] = await Promise.all([
+  const [cats, prods, clis, provs, ventas, gastos, presus, movs, emps, cc, cuotas, cuotasPagos] = await Promise.all([
     api('GET', 'categorias', null, `?negocio_id=eq.${negocioId}&order=nombre`),
     api('GET', 'productos', null, nid),
     api('GET', 'clientes', null, nid),
@@ -1564,6 +1685,8 @@ async function recargarTodo() {
     api('GET', 'movimientos', null, nid),
     api('GET', 'empleados', null, nid).catch(()=>[]),
     api('GET', 'cuentas_corrientes', null, nid).catch(()=>[]),
+    api('GET', 'cuotas', null, nid).catch(()=>[]),
+    api('GET', 'cuotas_pagos', null, nid).catch(()=>[]),
   ]);
   cache.categorias = cats || [];
   cache.productos = prods || [];
@@ -1575,6 +1698,8 @@ async function recargarTodo() {
   cache.movimientos = movs || [];
   cache.empleados = emps || [];
   cache.cc = cc || [];
+  cache.cuotas = cuotas || [];
+  cache.cuotasPagos = cuotasPagos || [];
 }
 
 function closeWizard() { document.getElementById('wizard').style.display='none'; }
@@ -1596,6 +1721,7 @@ function showPage(p, el) {
     gastos:'Gastos',caja:'Caja / Movimientos',contabilidad:'Contabilidad',
     reportes:'Reportes y Gráficos','cc-clientes':'Cuentas Corrientes — Clientes',
     'cc-proveedores':'Cuentas Corrientes — Proveedores','cc-empleados':'Empleados',
+    cuotas:'Módulo de Cuotas',
     admin:'Panel Administrador',config:'Configuración'};
   document.getElementById('topbar-title').textContent = titles[p] || p;
   const renders = {dashboard:renderDashboard,stock:renderStock,categorias:renderCategorias,
@@ -1603,6 +1729,7 @@ function showPage(p, el) {
     proveedores:renderProveedores,gastos:renderGastos,caja:renderCaja,
     contabilidad:renderContabilidad,reportes:renderReportes,
     'cc-clientes':renderCCClientes,'cc-proveedores':renderCCProveedores,'cc-empleados':renderEmpleados,
+    cuotas:renderCuotas,
     admin:cargarAdmin,config:renderConfig};
   if (renders[p]) renders[p]();
 }
@@ -4427,6 +4554,332 @@ async function delMovCC(id, tipo, entidadId) {
   if(tipo==='cliente') renderCCClientes();
   else if(tipo==='proveedor') renderCCProveedores();
   else renderEmpleados();
+}
+
+// ============================================================
+// MÓDULO DE CUOTAS
+// ============================================================
+
+function calcCuotas() {
+  const total = parseFloat(document.getElementById('cuota-total').value)||0;
+  const cant = parseInt(document.getElementById('cuota-cantidad').value)||1;
+  const interes = parseFloat(document.getElementById('cuota-interes').value)||0;
+  const totalConInteres = total * (1 + interes/100);
+  const montoCuota = cant > 0 ? totalConInteres / cant : 0;
+  document.getElementById('cuota-monto-preview').value = fmtD(montoCuota);
+  document.getElementById('cuota-total-preview').value = fmtD(totalConInteres);
+
+  // Preview tabla de cuotas
+  const fecha = document.getElementById('cuota-fecha').value;
+  if (!fecha || !total || !cant) { document.getElementById('cuota-preview-tabla').innerHTML=''; return; }
+  let html = `<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Vista previa de cuotas</div>
+    <div style="max-height:180px;overflow-y:auto">
+    <table><thead><tr><th>N°</th><th>Vencimiento</th><th>Monto</th></tr></thead><tbody>`;
+  for (let i=0; i<Math.min(cant,12); i++) {
+    const d = new Date(fecha);
+    d.setMonth(d.getMonth() + i + 1);
+    html += `<tr><td style="font-weight:700">${i+1}/${cant}</td><td style="color:var(--text3)">${d.toISOString().slice(0,10)}</td><td style="font-weight:700;color:var(--blue)">${fmtD(montoCuota)}</td></tr>`;
+  }
+  if (cant > 12) html += `<tr><td colspan="3" style="text-align:center;color:var(--text3);font-size:11px">... y ${cant-12} cuotas más</td></tr>`;
+  html += '</tbody></table></div>';
+  document.getElementById('cuota-preview-tabla').innerHTML = html;
+}
+
+async function saveCuota() {
+  const cliId = document.getElementById('cuota-cliente').value;
+  const cli = cache.clientes.find(c=>c.id===cliId);
+  const producto = document.getElementById('cuota-producto').value.trim();
+  const total = parseFloat(document.getElementById('cuota-total').value)||0;
+  const cant = parseInt(document.getElementById('cuota-cantidad').value)||1;
+  const interes = parseFloat(document.getElementById('cuota-interes').value)||0;
+  const fecha = document.getElementById('cuota-fecha').value;
+
+  if (!cliId) { alert('Seleccioná un cliente'); return; }
+  if (!producto) { alert('Ingresá el producto o descripción'); return; }
+  if (!total) { alert('Ingresá el total de la venta'); return; }
+  if (!fecha) { alert('Seleccioná la fecha de inicio'); return; }
+
+  const totalConInteres = total * (1 + interes/100);
+  const montoCuota = totalConInteres / cant;
+
+  showLoading('Creando plan de cuotas...');
+  try {
+    // Crear el plan
+    const plan = await api('POST', 'cuotas', {
+      negocio_id: negocioId,
+      cliente_id: cliId,
+      cliente_nombre: cli?.nombre || '',
+      producto_nombre: producto,
+      fecha_inicio: fecha,
+      total_venta: total,
+      cantidad_cuotas: cant,
+      monto_cuota: montoCuota,
+      interes,
+      notas: document.getElementById('cuota-notas').value,
+      estado: 'Activo'
+    });
+    const planId = Array.isArray(plan) ? plan[0].id : plan.id;
+
+    // Crear los pagos individuales
+    const pagos = [];
+    for (let i=0; i<cant; i++) {
+      const d = new Date(fecha);
+      d.setMonth(d.getMonth() + i + 1);
+      pagos.push({
+        negocio_id: negocioId,
+        cuota_id: planId,
+        numero_cuota: i+1,
+        fecha_vencimiento: d.toISOString().slice(0,10),
+        monto: montoCuota,
+        monto_pagado: 0,
+        estado: 'Pendiente'
+      });
+    }
+    // Insert pagos in batches
+    for (let i=0; i<pagos.length; i+=20) {
+      await api('POST', 'cuotas_pagos', pagos.slice(i,i+20));
+    }
+
+    // Registrar venta en cuotas
+    await api('POST', 'ventas', {
+      negocio_id: negocioId,
+      fecha,
+      comprobante: genNum('C-', cache.ventas),
+      producto_nombre: producto,
+      cliente_id: cliId,
+      cliente_nombre: cli?.nombre || '',
+      cantidad: 1,
+      precio_unit: total,
+      descuento: 0,
+      total,
+      metodo_pago: 'Cuotas',
+      estado: 'En cuotas',
+      notas: `Plan de ${cant} cuotas de ${fmtD(montoCuota)}`
+    });
+
+    await recargarTodo();
+    closeModal('modal-nueva-cuota');
+    renderCuotas();
+    hideLoading();
+    alert(`✅ Plan creado: ${cant} cuotas de ${fmtD(montoCuota)}`);
+  } catch(e) {
+    hideLoading();
+    alert('Error: ' + e.message);
+  }
+}
+
+function renderCuotas() {
+  const q = (document.getElementById('search-cuotas')?.value||'').toLowerCase();
+  const est = document.getElementById('filter-estado-cuota')?.value||'';
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+  // Cargar select de clientes en modal
+  const sc = document.getElementById('cuota-cliente');
+  if (sc) sc.innerHTML = '<option value="">-- Seleccioná cliente --</option>' +
+    cache.clientes.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  const cf = document.getElementById('cuota-fecha');
+  if (cf && !cf.value) cf.value = hoy();
+
+  // Calcular estado real de cada plan
+  const planesConEstado = cache.cuotas.map(plan => {
+    const pagos = cache.cuotasPagos.filter(p=>p.cuota_id===plan.id);
+    const pagadas = pagos.filter(p=>p.estado==='Pagado').length;
+    const vencidas = pagos.filter(p=>p.estado==='Pendiente'&&new Date(p.fecha_vencimiento)<hoy).length;
+    const totalPagado = pagos.filter(p=>p.estado==='Pagado').reduce((a,p)=>a+(p.monto_pagado||p.monto),0);
+    let estadoReal = plan.estado;
+    if (pagadas === plan.cantidad_cuotas) estadoReal = 'Completado';
+    else if (vencidas > 0) estadoReal = 'Vencido';
+    return {...plan, estadoReal, pagadas, vencidas, totalPagado, pagos};
+  });
+
+  // Filtrar
+  const filtrados = planesConEstado.filter(p=>
+    (!q||(p.cliente_nombre+p.producto_nombre).toLowerCase().includes(q))&&
+    (!est||p.estadoReal===est)
+  );
+
+  // KPIs
+  const totalDeuda = planesConEstado.reduce((a,p)=>a+(p.total_venta-(p.totalPagado||0)),0);
+  const activos = planesConEstado.filter(p=>p.estadoReal==='Activo').length;
+  const vencidos = planesConEstado.filter(p=>p.estadoReal==='Vencido').length;
+  const completados = planesConEstado.filter(p=>p.estadoReal==='Completado').length;
+  const cobrado = planesConEstado.reduce((a,p)=>a+(p.totalPagado||0),0);
+
+  document.getElementById('cuotas-kpis').innerHTML = `
+    <div class="metric-card mc-blue"><div class="mc-icon">📅</div><div class="mc-label">Planes activos</div><div class="mc-value blue">${activos}</div></div>
+    <div class="metric-card mc-red"><div class="mc-icon">⚠️</div><div class="mc-label">Con cuotas vencidas</div><div class="mc-value red">${vencidos}</div></div>
+    <div class="metric-card mc-amber"><div class="mc-icon">💳</div><div class="mc-label">Deuda total</div><div class="mc-value amber">${fmt(totalDeuda)}</div></div>
+    <div class="metric-card mc-green"><div class="mc-icon">✅</div><div class="mc-label">Total cobrado</div><div class="mc-value green">${fmt(cobrado)}</div></div>
+    <div class="metric-card"><div class="mc-icon">🏁</div><div class="mc-label">Completados</div><div class="mc-value">${completados}</div></div>`;
+
+  // Alertas de cuotas vencidas
+  const cuotasVencidasHoy = cache.cuotasPagos.filter(p=>
+    p.estado==='Pendiente' && new Date(p.fecha_vencimiento) < hoy
+  );
+  document.getElementById('cuotas-alertas').innerHTML = cuotasVencidasHoy.length
+    ? `<div class="alert alert-danger" style="margin-bottom:12px">⚠️ Hay <strong>${cuotasVencidasHoy.length} cuota${cuotasVencidasHoy.length===1?'':'s'}</strong> vencida${cuotasVencidasHoy.length===1?'':'s'} sin pagar. Revisá los planes marcados en rojo.</div>`
+    : '';
+
+  // Tabla
+  if (!filtrados.length) {
+    document.getElementById('tabla-cuotas').innerHTML = `<tr><td colspan="7">${emptyState('📅','Sin planes de cuotas','Creá una nueva venta en cuotas')}</td></tr>`;
+    return;
+  }
+
+  const estadoColor = {Activo:'blue',Completado:'green',Vencido:'red'};
+  document.getElementById('tabla-cuotas').innerHTML = filtrados.map(p => {
+    const pct = Math.round((p.pagadas/p.cantidad_cuotas)*100);
+    return `<tr style="cursor:pointer" onclick="verDetalleCuota('${p.id}')">
+      <td><div class="td-main">${p.cliente_nombre}</div></td>
+      <td style="font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto_nombre}</td>
+      <td style="font-weight:700">${fmt(p.total_venta)}</td>
+      <td style="text-align:center">${p.pagadas}/${p.cantidad_cuotas}</td>
+      <td>
+        <div style="background:var(--bg3);border-radius:20px;height:8px;overflow:hidden;width:80px">
+          <div style="height:100%;border-radius:20px;width:${pct}%;background:${pct===100?'var(--green)':p.vencidas>0?'var(--red)':'var(--blue)'}"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${pct}%</div>
+      </td>
+      <td><span class="badge badge-${estadoColor[p.estadoReal]||'gray'}">${p.estadoReal}</span></td>
+      <td><div class="actions">
+        <button class="action-btn edit" onclick="event.stopPropagation();verDetalleCuota('${p.id}')" title="Ver detalle">📋</button>
+        <button class="action-btn del" onclick="event.stopPropagation();delCuota('${p.id}')" title="Eliminar">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function verDetalleCuota(planId) {
+  const plan = cache.cuotas.find(c=>c.id===planId);
+  if (!plan) return;
+  const pagos = cache.cuotasPagos.filter(p=>p.cuota_id===planId).sort((a,b)=>a.numero_cuota-b.numero_cuota);
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const totalPagado = pagos.filter(p=>p.estado==='Pagado').reduce((a,p)=>a+(p.monto_pagado||p.monto),0);
+  const saldo = plan.total_venta - totalPagado;
+  const pct = Math.round((totalPagado/plan.total_venta)*100);
+
+  document.getElementById('cuota-detalle').innerHTML = `
+    <div class="card-header">
+      <h3>📋 ${plan.cliente_nombre}</h3>
+      <span class="badge badge-blue">${pagos.filter(p=>p.estado==='Pagado').length}/${plan.cantidad_cuotas} pagadas</span>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">${plan.producto_nombre}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="text-align:center;background:var(--bg3);border-radius:8px;padding:8px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase">Total</div>
+        <div style="font-weight:800;color:var(--blue)">${fmt(plan.total_venta)}</div>
+      </div>
+      <div style="text-align:center;background:var(--green-bg);border-radius:8px;padding:8px">
+        <div style="font-size:10px;color:var(--green-text);text-transform:uppercase">Cobrado</div>
+        <div style="font-weight:800;color:var(--green)">${fmt(totalPagado)}</div>
+      </div>
+      <div style="text-align:center;background:var(--red-bg);border-radius:8px;padding:8px">
+        <div style="font-size:10px;color:var(--red-text);text-transform:uppercase">Saldo</div>
+        <div style="font-weight:800;color:var(--red)">${fmt(saldo)}</div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:20px;height:10px;overflow:hidden;margin-bottom:12px">
+      <div style="height:100%;border-radius:20px;width:${pct}%;background:${pct===100?'var(--green)':'var(--blue)'};transition:width .4s"></div>
+    </div>
+    <div style="max-height:280px;overflow-y:auto">
+    <table style="font-size:12px">
+      <thead><tr><th>N°</th><th>Vencimiento</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${pagos.map(p => {
+        const vencida = p.estado==='Pendiente' && new Date(p.fecha_vencimiento) < hoy;
+        return `<tr style="background:${vencida?'var(--red-bg)':''}">
+          <td style="font-weight:700">${p.numero_cuota}/${plan.cantidad_cuotas}</td>
+          <td style="color:${vencida?'var(--red)':'var(--text3)'}">${p.fecha_vencimiento}</td>
+          <td style="font-weight:700">${fmtD(p.monto)}</td>
+          <td>${p.estado==='Pagado'
+            ? `<span class="badge badge-green">✅ ${p.fecha_pago||''}</span>`
+            : vencida
+              ? '<span class="badge badge-red">⚠️ Vencida</span>'
+              : '<span class="badge badge-amber">⏳ Pendiente</span>'
+          }</td>
+          <td>${p.estado!=='Pagado'
+            ? `<button class="btn btn-xs btn-green" onclick="abrirPagarCuota('${p.id}','${planId}',${p.monto},'${plan.cliente_nombre}',${p.numero_cuota},${plan.cantidad_cuotas})">💰 Pagar</button>`
+            : ''
+          }</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    </div>
+    ${plan.notas ? `<div style="margin-top:10px;font-size:12px;color:var(--text3)">📝 ${plan.notas}</div>` : ''}`;
+}
+
+function abrirPagarCuota(pagoId, planId, monto, cliente, numCuota, totalCuotas) {
+  document.getElementById('pago-cuota-id').value = pagoId;
+  document.getElementById('pago-cuotaplan-id').value = planId;
+  document.getElementById('pago-cuota-fecha').value = hoy();
+  document.getElementById('pago-cuota-monto').value = monto.toFixed(2);
+  document.getElementById('pago-cuota-notas').value = '';
+  document.getElementById('pago-cuota-info').innerHTML = `
+    <div style="font-weight:700;margin-bottom:4px">Cliente: ${cliente}</div>
+    <div style="color:var(--blue-text)">Cuota ${numCuota} de ${totalCuotas} · Monto: ${fmtD(monto)}</div>`;
+  openModal('modal-pagar-cuota');
+}
+
+async function registrarPagoCuota() {
+  const pagoId = document.getElementById('pago-cuota-id').value;
+  const planId = document.getElementById('pago-cuotaplan-id').value;
+  const fecha = document.getElementById('pago-cuota-fecha').value;
+  const monto = parseFloat(document.getElementById('pago-cuota-monto').value)||0;
+  const metodo = document.getElementById('pago-cuota-metodo').value;
+  const notas = document.getElementById('pago-cuota-notas').value;
+
+  if (!monto) { alert('Ingresá el monto pagado'); return; }
+
+  showLoading('Registrando pago...');
+  try {
+    // Actualizar el pago de la cuota
+    await api('PATCH', `cuotas_pagos?id=eq.${pagoId}`, {
+      fecha_pago: fecha,
+      monto_pagado: monto,
+      estado: 'Pagado',
+      metodo_pago: metodo,
+      notas
+    });
+
+    // Registrar movimiento de caja
+    const plan = cache.cuotas.find(c=>c.id===planId);
+    await api('POST', 'movimientos', {
+      negocio_id: negocioId,
+      fecha,
+      tipo: 'ingreso',
+      descripcion: `Pago cuota - ${plan?.cliente_nombre||''} - ${plan?.producto_nombre||''}`,
+      monto,
+      metodo
+    });
+
+    // Verificar si todas las cuotas están pagadas → marcar plan como Completado
+    await recargarTodo();
+    const pagosDelPlan = cache.cuotasPagos.filter(p=>p.cuota_id===planId);
+    const todasPagadas = pagosDelPlan.every(p=>p.estado==='Pagado');
+    if (todasPagadas) {
+      await api('PATCH', `cuotas?id=eq.${planId}`, { estado: 'Completado' });
+      await recargarTodo();
+    }
+
+    closeModal('modal-pagar-cuota');
+    renderCuotas();
+    verDetalleCuota(planId);
+    hideLoading();
+    alert(`✅ Pago registrado: ${fmt(monto)}`);
+  } catch(e) {
+    hideLoading();
+    alert('Error: ' + e.message);
+  }
+}
+
+async function delCuota(planId) {
+  if (!confirm('¿Eliminar este plan de cuotas y todos sus pagos?')) return;
+  showLoading('Eliminando...');
+  await api('DELETE', `cuotas_pagos?cuota_id=eq.${planId}`).catch(()=>{});
+  await api('DELETE', `cuotas?id=eq.${planId}`).catch(()=>{});
+  await recargarTodo();
+  hideLoading();
+  document.getElementById('cuota-detalle').innerHTML = '<div class="empty-state"><div class="ei">📅</div><p>Seleccioná un plan para ver el detalle</p></div>';
+  renderCuotas();
 }
 
 // ============================================================
